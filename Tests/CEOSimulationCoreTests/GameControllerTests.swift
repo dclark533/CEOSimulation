@@ -1,6 +1,7 @@
 import XCTest
 @testable import CEOSimulationCore
 
+@MainActor
 final class GameControllerTests: XCTestCase {
     var gameController: GameController!
     

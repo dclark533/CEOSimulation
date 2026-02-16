@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ScenarioCategory: String, CaseIterable {
+public enum ScenarioCategory: String, CaseIterable, Sendable {
     case budget = "Budget Crisis"
     case technical = "Technical Challenge" 
     case marketing = "Marketing Crisis"
@@ -8,7 +8,7 @@ public enum ScenarioCategory: String, CaseIterable {
     case opportunity = "Market Opportunity"
 }
 
-public struct DecisionOption {
+public struct DecisionOption: Equatable, Sendable {
     public let title: String
     public let description: String
     public let cost: Double
@@ -22,7 +22,7 @@ public struct DecisionOption {
     }
 }
 
-public struct DecisionImpact {
+public struct DecisionImpact: Equatable, Sendable {
     public let performanceChange: Double
     public let moraleChange: Double
     public let budgetChange: Double
@@ -44,7 +44,11 @@ public struct DecisionImpact {
     }
 }
 
-public struct Scenario {
+public struct Scenario: Equatable, Sendable {
+    public static func == (lhs: Scenario, rhs: Scenario) -> Bool {
+        lhs.id == rhs.id
+    }
+
     public let id: UUID
     public let category: ScenarioCategory
     public let title: String

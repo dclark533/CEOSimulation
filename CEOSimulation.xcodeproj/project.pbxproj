@@ -11,20 +11,12 @@
 		2A000001000000AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000AB /* ContentView.swift */; };
 		2A000001000000AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A000001000000AD /* Assets.xcassets */; };
 		2A000001000000B1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A000001000000B0 /* Preview Assets.xcassets */; };
-		2A000001000000B3 /* Company.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000B2 /* Company.swift */; };
-		2A000001000000B5 /* Department.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000B4 /* Department.swift */; };
-		2A000001000000B7 /* Scenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000B6 /* Scenario.swift */; };
-		2A000001000000B9 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000B8 /* GameController.swift */; };
-		2A000001000000BB /* ScenarioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000BA /* ScenarioManager.swift */; };
-		2A000001000000BD /* ScoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000BC /* ScoreManager.swift */; };
-		2A000001000000BF /* AIAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000BE /* AIAgent.swift */; };
-		2A000001000000C1 /* DepartmentAgents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C0 /* DepartmentAgents.swift */; };
 		2A000001000000C3 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C2 /* GameView.swift */; };
 		2A000001000000C5 /* AdvisorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C4 /* AdvisorsView.swift */; };
 		2A000001000000C7 /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C6 /* MetricsView.swift */; };
 		2A000001000000C9 /* QuarterlyReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C8 /* QuarterlyReportView.swift */; };
-		2A000001000000CB /* GameSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000CA /* GameSummary.swift */; };
 		2A000001000000CD /* ExitConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000CE /* ExitConfirmationView.swift */; };
+		2A000001000000D0 /* CEOSimulationCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2A000001000000CF /* CEOSimulationCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,19 +25,10 @@
 		2A000001000000AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2A000001000000AD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A000001000000B0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		2A000001000000B2 /* Company.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Company.swift; sourceTree = "<group>"; };
-		2A000001000000B4 /* Department.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Department.swift; sourceTree = "<group>"; };
-		2A000001000000B6 /* Scenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scenario.swift; sourceTree = "<group>"; };
-		2A000001000000B8 /* GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
-		2A000001000000BA /* ScenarioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioManager.swift; sourceTree = "<group>"; };
-		2A000001000000BC /* ScoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreManager.swift; sourceTree = "<group>"; };
-		2A000001000000BE /* AIAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAgent.swift; sourceTree = "<group>"; };
-		2A000001000000C0 /* DepartmentAgents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepartmentAgents.swift; sourceTree = "<group>"; };
 		2A000001000000C2 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		2A000001000000C4 /* AdvisorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisorsView.swift; sourceTree = "<group>"; };
 		2A000001000000C6 /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
 		2A000001000000C8 /* QuarterlyReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuarterlyReportView.swift; sourceTree = "<group>"; };
-		2A000001000000CA /* GameSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSummary.swift; sourceTree = "<group>"; };
 		2A000001000000CC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A000001000000CE /* ExitConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExitConfirmationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -55,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A000001000000D0 /* CEOSimulationCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,10 +59,6 @@
 				2A000001000000A9 /* CEOSimulationApp.swift */,
 				2A000001000000AB /* ContentView.swift */,
 				2A00000100000085 /* Views */,
-				2A00000100000086 /* Models */,
-				2A00000100000087 /* Controllers */,
-				2A00000100000088 /* Managers */,
-				2A00000100000089 /* Agents */,
 				2A000001000000AD /* Assets.xcassets */,
 				2A000001000000CC /* Info.plist */,
 				2A00000100000090 /* Preview Content */,
@@ -106,43 +86,6 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		2A00000100000086 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				2A000001000000B2 /* Company.swift */,
-				2A000001000000B4 /* Department.swift */,
-				2A000001000000B6 /* Scenario.swift */,
-				2A000001000000CA /* GameSummary.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		2A00000100000087 /* Controllers */ = {
-			isa = PBXGroup;
-			children = (
-				2A000001000000B8 /* GameController.swift */,
-			);
-			path = Controllers;
-			sourceTree = "<group>";
-		};
-		2A00000100000088 /* Managers */ = {
-			isa = PBXGroup;
-			children = (
-				2A000001000000BA /* ScenarioManager.swift */,
-				2A000001000000BC /* ScoreManager.swift */,
-			);
-			path = Managers;
-			sourceTree = "<group>";
-		};
-		2A00000100000089 /* Agents */ = {
-			isa = PBXGroup;
-			children = (
-				2A000001000000BE /* AIAgent.swift */,
-				2A000001000000C0 /* DepartmentAgents.swift */,
-			);
-			path = Agents;
-			sourceTree = "<group>";
-		};
 		2A00000100000090 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
@@ -167,6 +110,9 @@
 			dependencies = (
 			);
 			name = CEOSimulation;
+			packageProductDependencies = (
+				2A000001000000CF /* CEOSimulationCore */,
+			);
 			productName = CEOSimulation;
 			productReference = 2A00000100000080 /* CEOSimulation.app */;
 			productType = "com.apple.product-type.application";
@@ -195,6 +141,9 @@
 				Base,
 			);
 			mainGroup = 2A00000100000081;
+			packageReferences = (
+				2A000001000000D1 /* XCLocalSwiftPackageReference "." */,
+			);
 			productRefGroup = 2A00000100000084 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -222,19 +171,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				2A000001000000AC /* ContentView.swift in Sources */,
-				2A000001000000B3 /* Company.swift in Sources */,
-				2A000001000000B5 /* Department.swift in Sources */,
-				2A000001000000B7 /* Scenario.swift in Sources */,
-				2A000001000000B9 /* GameController.swift in Sources */,
-				2A000001000000BB /* ScenarioManager.swift in Sources */,
-				2A000001000000BD /* ScoreManager.swift in Sources */,
-				2A000001000000BF /* AIAgent.swift in Sources */,
-				2A000001000000C1 /* DepartmentAgents.swift in Sources */,
 				2A000001000000C3 /* GameView.swift in Sources */,
 				2A000001000000C5 /* AdvisorsView.swift in Sources */,
 				2A000001000000C7 /* MetricsView.swift in Sources */,
 				2A000001000000C9 /* QuarterlyReportView.swift in Sources */,
-				2A000001000000CB /* GameSummary.swift in Sources */,
 				2A000001000000CD /* ExitConfirmationView.swift in Sources */,
 				2A000001000000AA /* CEOSimulationApp.swift in Sources */,
 			);
@@ -475,6 +415,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		2A000001000000D1 /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2A000001000000CF /* CEOSimulationCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CEOSimulationCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2A00000100000095 /* Project object */;
 }

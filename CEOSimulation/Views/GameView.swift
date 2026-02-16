@@ -1,4 +1,5 @@
 import SwiftUI
+import CEOSimulationCore
 
 struct GameView: View {
     let gameController: GameController

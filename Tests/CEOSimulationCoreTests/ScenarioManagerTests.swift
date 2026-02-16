@@ -1,6 +1,7 @@
 import XCTest
 @testable import CEOSimulationCore
 
+@MainActor
 final class ScenarioManagerTests: XCTestCase {
     var scenarioManager: ScenarioManager!
     var company: Company!

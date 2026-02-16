@@ -1,4 +1,5 @@
 import SwiftUI
+import CEOSimulationCore
 
 struct ExitConfirmationView: View {
     let gameController: GameController

@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 public protocol AIAgent {
     var department: DepartmentType { get }
     var personality: AgentPersonality { get }
@@ -9,7 +10,7 @@ public protocol AIAgent {
     func reactToDecision(_ decision: DecisionOption, impact: DecisionImpact) -> String
 }
 
-public struct AgentPersonality {
+public struct AgentPersonality: Sendable {
     public let traits: [String]
     public let communicationStyle: CommunicationStyle
     public let riskTolerance: RiskTolerance
@@ -21,7 +22,7 @@ public struct AgentPersonality {
     }
 }
 
-public enum CommunicationStyle: String, CaseIterable {
+public enum CommunicationStyle: String, CaseIterable, Sendable {
     case analytical = "Analytical"
     case enthusiastic = "Enthusiastic" 
     case cautious = "Cautious"
@@ -29,13 +30,13 @@ public enum CommunicationStyle: String, CaseIterable {
     case diplomatic = "Diplomatic"
 }
 
-public enum RiskTolerance: String, CaseIterable {
+public enum RiskTolerance: String, CaseIterable, Sendable {
     case conservative = "Conservative"
     case moderate = "Moderate"
     case aggressive = "Aggressive"
 }
 
-public struct AgentResponse {
+public struct AgentResponse: Sendable {
     public let message: String
     public let recommendedOption: Int?
     public let reasoning: String
@@ -49,11 +50,12 @@ public struct AgentResponse {
     }
 }
 
-public enum AgentMood: String, CaseIterable {
+public enum AgentMood: String, CaseIterable, Sendable {
     case happy = "😊"
     case neutral = "😐"
     case concerned = "😟"
     case frustrated = "😤"
     case excited = "🤩"
     case worried = "😰"
+    case cautious = "🤔"
 }

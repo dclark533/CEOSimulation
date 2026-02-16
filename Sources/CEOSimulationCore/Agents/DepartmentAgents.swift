@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 public class SalesAgent: AIAgent {
     public let department: DepartmentType = .sales
     public let personality: AgentPersonality
@@ -75,6 +76,7 @@ public class SalesAgent: AIAgent {
     }
 }
 
+@MainActor
 public class MarketingAgent: AIAgent {
     public let department: DepartmentType = .marketing
     public let personality: AgentPersonality
@@ -150,6 +152,7 @@ public class MarketingAgent: AIAgent {
     }
 }
 
+@MainActor
 public class EngineeringAgent: AIAgent {
     public let department: DepartmentType = .engineering
     public let personality: AgentPersonality
@@ -234,6 +237,7 @@ public class EngineeringAgent: AIAgent {
     }
 }
 
+@MainActor
 public class HRAgent: AIAgent {
     public let department: DepartmentType = .hr
     public let personality: AgentPersonality
@@ -309,6 +313,7 @@ public class HRAgent: AIAgent {
     }
 }
 
+@MainActor
 public class FinanceAgent: AIAgent {
     public let department: DepartmentType = .finance
     public let personality: AgentPersonality
@@ -322,8 +327,6 @@ public class FinanceAgent: AIAgent {
     }
     
     public func generateResponse(to scenario: Scenario, companyState: Company) -> AgentResponse {
-        let financeDept = companyState.departments.first { $0.type == .finance }!
-        
         switch scenario.category {
         case .budget:
             return AgentResponse(
@@ -350,7 +353,6 @@ public class FinanceAgent: AIAgent {
     }
     
     public func provideQuarterlyReport(for company: Company) -> String {
-        let financeDept = company.departments.first { $0.type == .finance }!
         let budget = Int(company.budget)
         
         if budget >= 100000 {
@@ -377,6 +379,7 @@ public class FinanceAgent: AIAgent {
     }
 }
 
+@MainActor
 public class AgentManager {
     public let agents: [AIAgent]
     

@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 @Observable
 public class Company {
     public var budget: Double
@@ -9,9 +10,9 @@ public class Company {
     public var departments: [Department]
     
     public init(
-        budget: Double = 100000,
-        reputation: Double = 50,
-        overallPerformance: Double = 50,
+        budget: Double = GameConstants.initialBudget,
+        reputation: Double = GameConstants.initialReputation,
+        overallPerformance: Double = GameConstants.initialPerformance,
         quarter: Int = 1
     ) {
         self.budget = budget

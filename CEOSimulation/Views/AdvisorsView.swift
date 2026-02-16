@@ -1,4 +1,5 @@
 import SwiftUI
+import CEOSimulationCore
 
 struct AdvisorsView: View {
     let agentManager: AgentManager

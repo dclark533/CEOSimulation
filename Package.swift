@@ -12,15 +12,10 @@ let package = Package(
             name: "CEOSimulationCore",
             targets: ["CEOSimulationCore"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-collections.git", from: "1.0.0")
-    ],
     targets: [
         .target(
             name: "CEOSimulationCore",
-            dependencies: [
-                .product(name: "Collections", package: "swift-collections")
-            ]
+            swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]
         ),
         .testTarget(
             name: "CEOSimulationCoreTests",

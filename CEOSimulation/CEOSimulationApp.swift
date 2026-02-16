@@ -1,4 +1,5 @@
 import SwiftUI
+import CEOSimulationCore
 
 @main
 struct CEOSimulationApp: App {

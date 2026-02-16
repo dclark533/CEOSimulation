@@ -1,6 +1,6 @@
 import Foundation
 
-public enum DepartmentType: String, CaseIterable {
+public enum DepartmentType: String, CaseIterable, Sendable {
     case sales = "Sales"
     case marketing = "Marketing" 
     case engineering = "Engineering"
@@ -18,6 +18,7 @@ public enum DepartmentType: String, CaseIterable {
     }
 }
 
+@MainActor
 @Observable
 public class Department {
     public let type: DepartmentType
@@ -28,18 +29,19 @@ public class Department {
     
     public init(type: DepartmentType) {
         self.type = type
-        self.performance = Double.random(in: 40...60)
-        self.morale = Double.random(in: 40...60)
-        self.budget = 20000
+        self.performance = Double.random(in: GameConstants.departmentPerformanceRange)
+        self.morale = Double.random(in: GameConstants.departmentMoraleRange)
+        self.budget = GameConstants.initialDepartmentBudget
         self.quarterlyReports = []
     }
-    
+
     public func applyDecisionImpact(_ impact: DecisionImpact) {
-        performance = max(0, min(100, performance + impact.performanceChange))
-        morale = max(0, min(100, morale + impact.moraleChange))
+        performance = max(GameConstants.metricMin, min(GameConstants.metricMax, performance + impact.performanceChange))
+        morale = max(GameConstants.metricMin, min(GameConstants.metricMax, morale + impact.moraleChange))
         budget += impact.budgetChange
     }
     
+    @discardableResult
     public func generateQuarterlyReport() -> String {
         let report = "\(type.rawValue) Q\(quarterlyReports.count + 1): Performance \(Int(performance))%, Morale \(Int(morale))%"
         quarterlyReports.append(report)

@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 public class ScenarioManager {
     private let scenarioTemplates: [ScenarioCategory: [ScenarioTemplate]]
     
@@ -21,18 +22,18 @@ public class ScenarioManager {
     
     private func selectScenarioCategory(for company: Company) -> ScenarioCategory {
         var weights: [ScenarioCategory: Double] = [:]
-        
-        if company.budget < 50000 {
+
+        if company.budget < GameConstants.lowBudgetThreshold {
             weights[.budget] = 0.4
         } else {
             weights[.opportunity] = 0.3
         }
-        
-        if company.reputation < 30 {
+
+        if company.reputation < GameConstants.lowReputationThreshold {
             weights[.marketing] = 0.3
         }
-        
-        if company.overallPerformance < 40 {
+
+        if company.overallPerformance < GameConstants.lowPerformanceThreshold {
             weights[.technical] = 0.3
             weights[.hr] = 0.2
         }
@@ -121,6 +122,7 @@ public class ScenarioManager {
     }
 }
 
+@MainActor
 private protocol ScenarioTemplate {
     func createScenario(for company: Company) -> Scenario
 }

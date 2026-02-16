@@ -1,4 +1,5 @@
 import SwiftUI
+import CEOSimulationCore
 
 struct ContentView: View {
     @State private var gameController = GameController()
