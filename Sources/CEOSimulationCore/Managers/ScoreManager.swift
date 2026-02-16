@@ -1,33 +1,68 @@
 import Foundation
 
+public struct ScoreBreakdown: Sendable {
+    public let baseScore: Int
+    public let longevityBonus: Int
+    public let consistencyBonus: Int
+    public let efficiencyBonus: Int
+    public let riskRewardBonus: Int
+    public let departmentBalanceBonus: Int
+    public let totalScore: Int
+
+    public init(baseScore: Int, longevityBonus: Int, consistencyBonus: Int, efficiencyBonus: Int, riskRewardBonus: Int, departmentBalanceBonus: Int) {
+        self.baseScore = baseScore
+        self.longevityBonus = longevityBonus
+        self.consistencyBonus = consistencyBonus
+        self.efficiencyBonus = efficiencyBonus
+        self.riskRewardBonus = riskRewardBonus
+        self.departmentBalanceBonus = departmentBalanceBonus
+        self.totalScore = max(0, baseScore + longevityBonus + consistencyBonus + efficiencyBonus + riskRewardBonus + departmentBalanceBonus)
+    }
+}
+
 @MainActor
 public class ScoreManager {
     private var decisionHistory: [ScoredDecision] = []
     private var performanceMetrics: PerformanceMetrics = PerformanceMetrics()
-    
+
     public init() {}
-    
-    public func recordDecision(_ decision: DecisionOption, for company: Company) {
+
+    public func recordDecision(_ decision: DecisionOption, for company: Company, riskLevel: RiskLevel = .medium, actualImpact: DecisionImpact? = nil) {
         let scoredDecision = ScoredDecision(
             decision: decision,
             quarterMade: company.quarter,
             companyStateBefore: CompanySnapshot(from: company),
-            timestamp: Date()
+            timestamp: Date(),
+            riskLevel: riskLevel,
+            actualImpact: actualImpact
         )
-        
+
         decisionHistory.append(scoredDecision)
         updatePerformanceMetrics(company)
     }
-    
+
     public func calculateScore(for company: Company) -> Int {
-        let baseScore = calculateBaseScore(company)
-        let longevityBonus = calculateLongevityBonus(company)
-        let consistencyBonus = calculateConsistencyBonus()
-        let efficiencyBonus = calculateEfficiencyBonus()
-        
-        return max(0, baseScore + longevityBonus + consistencyBonus + efficiencyBonus)
+        return getScoreBreakdown(for: company).totalScore
     }
-    
+
+    public func getScoreBreakdown(for company: Company) -> ScoreBreakdown {
+        let base = calculateBaseScore(company)
+        let longevity = calculateLongevityBonus(company)
+        let consistency = calculateConsistencyBonus()
+        let efficiency = calculateEfficiencyBonus()
+        let riskReward = calculateRiskRewardBonus()
+        let balance = calculateDepartmentBalanceBonus(company)
+
+        return ScoreBreakdown(
+            baseScore: base,
+            longevityBonus: longevity,
+            consistencyBonus: consistency,
+            efficiencyBonus: efficiency,
+            riskRewardBonus: riskReward,
+            departmentBalanceBonus: balance
+        )
+    }
+
     private func calculateBaseScore(_ company: Company) -> Int {
         let budgetScore = min(Int(GameConstants.metricMax), max(0, Int(company.budget / GameConstants.budgetScoreDivisor)))
         let reputationScore = Int(company.reputation * GameConstants.reputationScoreMultiplier)
@@ -61,14 +96,35 @@ public class ScoreManager {
 
         return lowCostHighImpactDecisions * GameConstants.efficiencyBonusPerDecision
     }
-    
+
+    public func calculateRiskRewardBonus() -> Int {
+        var bonus = 0
+        for decision in decisionHistory {
+            guard let actual = decision.actualImpact else { continue }
+            let isSuccess = actual.performanceChange >= 0 || actual.reputationChange >= 0
+            if decision.riskLevel == .high && isSuccess {
+                bonus += GameConstants.highRiskSuccessBonus
+            } else if decision.riskLevel == .medium && isSuccess {
+                bonus += GameConstants.mediumRiskSuccessBonus
+            }
+        }
+        return bonus
+    }
+
+    public func calculateDepartmentBalanceBonus(_ company: Company) -> Int {
+        let allAboveThreshold = company.departments.allSatisfy {
+            $0.performance >= GameConstants.departmentBalanceThreshold
+        }
+        return allAboveThreshold ? GameConstants.departmentBalanceBonus : 0
+    }
+
     private func updatePerformanceMetrics(_ company: Company) {
         performanceMetrics.totalBudgetSpent += decisionHistory.last?.decision.cost ?? 0
         performanceMetrics.averagePerformance = company.departments.map(\.performance).reduce(0, +) / Double(company.departments.count)
         performanceMetrics.averageMorale = company.departments.map(\.morale).reduce(0, +) / Double(company.departments.count)
         performanceMetrics.currentReputation = company.reputation
     }
-    
+
     public func getPerformanceAnalysis(for company: Company) -> PerformanceAnalysis {
         return PerformanceAnalysis(
             totalScore: calculateScore(for: company),
@@ -82,15 +138,15 @@ public class ScoreManager {
             leadershipStyle: determineLeadershipStyle()
         )
     }
-    
+
     private func findStrongestDepartment(_ company: Company) -> DepartmentType {
         return company.departments.max(by: { $0.performance < $1.performance })?.type ?? .sales
     }
-    
+
     private func findWeakestDepartment(_ company: Company) -> DepartmentType {
         return company.departments.min(by: { $0.performance < $1.performance })?.type ?? .sales
     }
-    
+
     private func identifyStrengths(_ company: Company) -> [String] {
         var strengths: [String] = []
 
@@ -165,17 +221,26 @@ public class ScoreManager {
             return .balanced
         }
     }
-    
+
     public func getDecisionHistory() -> [ScoredDecision] {
         return decisionHistory
     }
-    
+
     public func getTopPerformingDecisions() -> [ScoredDecision] {
         return decisionHistory
             .filter { $0.decision.impact.performanceChange > 5 || $0.decision.impact.reputationChange > 3 }
             .sorted { $0.decision.impact.performanceChange > $1.decision.impact.performanceChange }
             .prefix(5)
             .map { $0 }
+    }
+
+    public func getHighRiskStats() -> (taken: Int, successes: Int) {
+        let highRisk = decisionHistory.filter { $0.riskLevel == .high }
+        let successes = highRisk.filter { scored in
+            guard let actual = scored.actualImpact else { return false }
+            return actual.performanceChange >= 0 || actual.reputationChange >= 0
+        }.count
+        return (taken: highRisk.count, successes: successes)
     }
 }
 
@@ -184,12 +249,16 @@ public struct ScoredDecision: Sendable {
     public let quarterMade: Int
     public let companyStateBefore: CompanySnapshot
     public let timestamp: Date
-    
-    public init(decision: DecisionOption, quarterMade: Int, companyStateBefore: CompanySnapshot, timestamp: Date) {
+    public let riskLevel: RiskLevel
+    public let actualImpact: DecisionImpact?
+
+    public init(decision: DecisionOption, quarterMade: Int, companyStateBefore: CompanySnapshot, timestamp: Date, riskLevel: RiskLevel = .medium, actualImpact: DecisionImpact? = nil) {
         self.decision = decision
         self.quarterMade = quarterMade
         self.companyStateBefore = companyStateBefore
         self.timestamp = timestamp
+        self.riskLevel = riskLevel
+        self.actualImpact = actualImpact
     }
 }
 
@@ -214,7 +283,7 @@ public struct PerformanceMetrics: Sendable {
     public var averagePerformance: Double = 50
     public var averageMorale: Double = 50
     public var currentReputation: Double = 50
-    
+
     public init() {}
 }
 
@@ -228,7 +297,7 @@ public struct PerformanceAnalysis: Sendable {
     public let keyStrengths: [String]
     public let areasForImprovement: [String]
     public let leadershipStyle: LeadershipStyle
-    
+
     public init(
         totalScore: Int,
         quartersSurvived: Int,
@@ -256,7 +325,7 @@ public enum LeadershipStyle: String, CaseIterable, Sendable {
     case aggressive = "Aggressive Growth"
     case conservative = "Conservative Steward"
     case balanced = "Balanced Strategic"
-    
+
     public var description: String {
         switch self {
         case .aggressive:

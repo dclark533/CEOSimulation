@@ -39,4 +39,19 @@ final class CompanyTests: XCTestCase {
             XCTAssertEqual(dept.quarterlyReports.count, 1)
         }
     }
+
+    func testAdvanceQuarterIncrementsNeglectCounters() {
+        let company = Company()
+        for dept in company.departments {
+            XCTAssertEqual(dept.quartersSinceLastInvestment, 0)
+        }
+        company.advanceQuarter()
+        for dept in company.departments {
+            XCTAssertEqual(dept.quartersSinceLastInvestment, 1, "\(dept.type.rawValue) neglect counter should be 1 after advancing quarter")
+        }
+        company.advanceQuarter()
+        for dept in company.departments {
+            XCTAssertEqual(dept.quartersSinceLastInvestment, 2, "\(dept.type.rawValue) neglect counter should be 2 after advancing two quarters")
+        }
+    }
 }

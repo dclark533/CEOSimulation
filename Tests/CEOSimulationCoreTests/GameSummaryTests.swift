@@ -33,13 +33,13 @@ final class GameSummaryTests: XCTestCase {
 
     func testPerformanceGrades() {
         let gradeTests: [(Int, String)] = [
-            (850, "A+"),
-            (750, "A"),
-            (650, "B+"),
-            (550, "B"),
-            (450, "C+"),
-            (350, "C"),
-            (250, "D"),
+            (950, "A+"),
+            (850, "A"),
+            (750, "B+"),
+            (650, "B"),
+            (550, "C+"),
+            (450, "C"),
+            (300, "D"),
             (100, "F"),
         ]
 
@@ -97,5 +97,40 @@ final class GameSummaryTests: XCTestCase {
             gameEndReason: "Budget ran out"
         )
         XCTAssertTrue(earlyFail.summaryMessage.contains("experience"))
+    }
+
+    func testNewFieldsDefaultValues() {
+        let summary = GameSummary(
+            quartersSurvived: 5,
+            scenariosCompleted: 20,
+            currentScore: 500,
+            finalBudget: 50000,
+            finalReputation: 50,
+            finalPerformance: 50,
+            strongestDepartment: .sales,
+            gameEndReason: "Test"
+        )
+        XCTAssertEqual(summary.highRiskDecisionsTaken, 0)
+        XCTAssertEqual(summary.highRiskSuccesses, 0)
+        XCTAssertTrue(summary.neglectedDepartments.isEmpty)
+    }
+
+    func testNewFieldsWithValues() {
+        let summary = GameSummary(
+            quartersSurvived: 8,
+            scenariosCompleted: 32,
+            currentScore: 600,
+            finalBudget: 45000,
+            finalReputation: 55,
+            finalPerformance: 60,
+            strongestDepartment: .engineering,
+            gameEndReason: "Completed",
+            highRiskDecisionsTaken: 5,
+            highRiskSuccesses: 3,
+            neglectedDepartments: [.hr, .finance]
+        )
+        XCTAssertEqual(summary.highRiskDecisionsTaken, 5)
+        XCTAssertEqual(summary.highRiskSuccesses, 3)
+        XCTAssertEqual(summary.neglectedDepartments.count, 2)
     }
 }

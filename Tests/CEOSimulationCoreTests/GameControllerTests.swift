@@ -41,7 +41,43 @@ final class GameControllerTests: XCTestCase {
     func testScoreCalculation() {
         gameController.startNewGame()
         let initialScore = gameController.getCurrentScore()
-        
+
         XCTAssertGreaterThan(initialScore, 0)
+    }
+
+    func testMarketEventInitiallyNil() {
+        gameController.startNewGame()
+        XCTAssertNil(gameController.currentMarketEvent)
+        XCTAssertEqual(gameController.marketEventQuartersRemaining, 0)
+    }
+
+    func testStartNewGameResetsMarketEvent() {
+        gameController.startNewGame()
+        // Manually set a market event to simulate one being active
+        gameController.currentMarketEvent = MarketEventPool.events.first
+        gameController.marketEventQuartersRemaining = 2
+
+        gameController.startNewGame()
+        XCTAssertNil(gameController.currentMarketEvent)
+        XCTAssertEqual(gameController.marketEventQuartersRemaining, 0)
+    }
+
+    func testScoreBreakdown() {
+        gameController.startNewGame()
+        let breakdown = gameController.getScoreBreakdown()
+        XCTAssertGreaterThanOrEqual(breakdown.baseScore, 0)
+        XCTAssertGreaterThanOrEqual(breakdown.longevityBonus, 0)
+        XCTAssertEqual(breakdown.totalScore, gameController.getCurrentScore())
+    }
+
+    func testMakeDecisionAdvancesGame() {
+        gameController.startNewGame()
+        XCTAssertNotNil(gameController.currentScenario)
+        let initialHistoryCount = gameController.scenarioHistory.count
+
+        if gameController.currentScenario != nil {
+            gameController.makeDecision(0)
+            XCTAssertEqual(gameController.scenarioHistory.count, initialHistoryCount + 1)
+        }
     }
 }

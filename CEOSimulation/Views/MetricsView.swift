@@ -175,7 +175,7 @@ struct DepartmentPerformanceChart: View {
 
 struct DepartmentBarChart: View {
     let department: Department
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -186,22 +186,28 @@ struct DepartmentBarChart: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
-                
+
+                if department.isNeglected {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+
                 Spacer()
-                
+
                 Text("\(Int(department.performance))%")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(department.performance > 60 ? .green : department.performance > 40 ? .orange : .red)
             }
-            
+
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle()
                         .fill(Color(.systemGray4))
                         .frame(height: 8)
                         .cornerRadius(4)
-                    
+
                     Rectangle()
                         .fill(department.performance > 60 ? .green : department.performance > 40 ? .orange : .red)
                         .frame(width: geometry.size.width * (department.performance / 100), height: 8)
@@ -215,41 +221,61 @@ struct DepartmentBarChart: View {
 
 struct ScoreBreakdownView: View {
     let gameController: GameController
-    
+
     var body: some View {
+        let breakdown = gameController.getScoreBreakdown()
+
         VStack(alignment: .leading, spacing: 12) {
             Text("Score Breakdown")
                 .font(.headline)
-            
+
             VStack(alignment: .leading, spacing: 8) {
                 ScoreComponentRow(
                     label: "Base Performance",
-                    value: calculateBaseScore(),
+                    value: breakdown.baseScore,
                     description: "Budget, reputation, and department performance"
                 )
-                
+
                 ScoreComponentRow(
                     label: "Longevity Bonus",
-                    value: gameController.company.quarter * 10,
+                    value: breakdown.longevityBonus,
                     description: "Bonus for surviving \(gameController.company.quarter) quarters"
                 )
-                
+
                 ScoreComponentRow(
-                    label: "Decision Quality",
-                    value: 50, // Placeholder
-                    description: "Consistency and strategic thinking"
+                    label: "Consistency",
+                    value: breakdown.consistencyBonus,
+                    description: "Balanced, measured decisions"
                 )
-                
+
+                ScoreComponentRow(
+                    label: "Efficiency",
+                    value: breakdown.efficiencyBonus,
+                    description: "High-impact, low-cost decisions"
+                )
+
+                ScoreComponentRow(
+                    label: "Risk-Reward Bonus",
+                    value: breakdown.riskRewardBonus,
+                    description: "Successful risky decisions"
+                )
+
+                ScoreComponentRow(
+                    label: "Department Balance",
+                    value: breakdown.departmentBalanceBonus,
+                    description: "All departments above 50% performance"
+                )
+
                 Divider()
-                
+
                 HStack {
                     Text("Total Score")
                         .font(.headline)
                         .fontWeight(.bold)
-                    
+
                     Spacer()
-                    
-                    Text("\(gameController.getCurrentScore())")
+
+                    Text("\(breakdown.totalScore)")
                         .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(.blue)
@@ -259,16 +285,6 @@ struct ScoreBreakdownView: View {
             .background(Color(.systemGray6))
             .cornerRadius(12)
         }
-    }
-    
-    private func calculateBaseScore() -> Int {
-        let company = gameController.company
-        let budgetScore = min(100, max(0, Int(company.budget / 1000)))
-        let reputationScore = Int(company.reputation * 2)
-        let performanceScore = Int(company.overallPerformance * 1.5)
-        let departmentScore = company.departments.map { Int($0.performance + $0.morale) / 2 }.reduce(0, +)
-        
-        return budgetScore + reputationScore + performanceScore + departmentScore
     }
 }
 

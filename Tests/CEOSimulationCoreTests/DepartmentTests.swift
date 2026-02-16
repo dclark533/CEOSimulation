@@ -84,4 +84,33 @@ final class DepartmentTests: XCTestCase {
         XCTAssertEqual(dept.quarterlyReports.count, 2)
         XCTAssertTrue(report2.contains("Q2"))
     }
+
+    func testNeglectTrackingInitial() {
+        let dept = Department(type: .sales)
+        XCTAssertEqual(dept.quartersSinceLastInvestment, 0)
+        XCTAssertFalse(dept.isNeglected)
+    }
+
+    func testInvestmentResetOnPositiveImpact() {
+        let dept = Department(type: .marketing)
+        dept.quartersSinceLastInvestment = 5
+        let impact = DecisionImpact(performanceChange: 3)
+        dept.applyDecisionImpact(impact)
+        XCTAssertEqual(dept.quartersSinceLastInvestment, 0)
+    }
+
+    func testNoResetOnNegativeImpact() {
+        let dept = Department(type: .finance)
+        dept.quartersSinceLastInvestment = 3
+        let impact = DecisionImpact(performanceChange: -5, moraleChange: -5, budgetChange: -1000)
+        dept.applyDecisionImpact(impact)
+        XCTAssertEqual(dept.quartersSinceLastInvestment, 3)
+    }
+
+    func testQuarterlyReportIncrementsNeglect() {
+        let dept = Department(type: .hr)
+        XCTAssertEqual(dept.quartersSinceLastInvestment, 0)
+        dept.generateQuarterlyReport()
+        XCTAssertEqual(dept.quartersSinceLastInvestment, 1)
+    }
 }

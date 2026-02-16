@@ -61,4 +61,40 @@ public enum GameConstants {
     public static let expensiveDecisionLookback: Int = 8
     public static let expensiveDecisionCountThreshold: Int = 4
     public static let consistencyBonusStrengthThreshold: Int = 15
+
+    // MARK: - Risk & Variance
+    public static let lowVariance: Double = 0.08
+    public static let mediumVariance: Double = 0.22
+    public static let highVariance: Double = 0.40
+
+    // MARK: - Difficulty Scaling (Startup Q1-4)
+    public static let startupImpactMultiplier: Double = 0.7
+    public static let startupCostMultiplier: Double = 0.6
+    public static let startupVarianceMultiplier: Double = 0.7
+
+    // MARK: - Difficulty Scaling (Growth Q5-8)
+    public static let growthImpactMultiplier: Double = 1.0
+    public static let growthCostMultiplier: Double = 1.0
+    public static let growthVarianceMultiplier: Double = 1.0
+
+    // MARK: - Difficulty Scaling (Enterprise Q9-12)
+    public static let enterpriseImpactMultiplier: Double = 1.4
+    public static let enterpriseCostMultiplier: Double = 1.3
+    public static let enterpriseVarianceMultiplier: Double = 1.3
+
+    // MARK: - Market Events
+    public static let marketEventChance: Double = 0.4
+    public static let marketEventMinDuration: Int = 1
+    public static let marketEventMaxDuration: Int = 2
+
+    // MARK: - Department Neglect
+    public static let neglectThresholdQuarters: Int = 2
+    public static let neglectPerformanceDecay: Double = -2.0
+    public static let neglectMoraleDecay: Double = -3.0
+
+    // MARK: - Enhanced Scoring
+    public static let highRiskSuccessBonus: Int = 20
+    public static let mediumRiskSuccessBonus: Int = 10
+    public static let departmentBalanceBonus: Int = 30
+    public static let departmentBalanceThreshold: Double = 50.0
 }

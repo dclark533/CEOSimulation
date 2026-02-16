@@ -139,4 +139,89 @@ final class ScoreManagerTests: XCTestCase {
         XCTAssertTrue(analysis.areasForImprovement.contains("Brand Reputation Recovery"))
         XCTAssertTrue(analysis.areasForImprovement.contains("Operational Efficiency"))
     }
+
+    func testRiskRewardBonusHighRisk() {
+        let option = DecisionOption(
+            title: "Risky",
+            description: "High risk decision",
+            cost: 20000,
+            impact: DecisionImpact(performanceChange: 10, budgetChange: -20000),
+            riskLevel: .high
+        )
+        let actualImpact = DecisionImpact(performanceChange: 8, budgetChange: -20000)
+        scoreManager.recordDecision(option, for: company, riskLevel: .high, actualImpact: actualImpact)
+
+        let bonus = scoreManager.calculateRiskRewardBonus()
+        XCTAssertEqual(bonus, GameConstants.highRiskSuccessBonus)
+    }
+
+    func testRiskRewardBonusMediumRisk() {
+        let option = DecisionOption(
+            title: "Moderate",
+            description: "Medium risk decision",
+            cost: 10000,
+            impact: DecisionImpact(performanceChange: 5, budgetChange: -10000),
+            riskLevel: .medium
+        )
+        let actualImpact = DecisionImpact(performanceChange: 4, reputationChange: 2)
+        scoreManager.recordDecision(option, for: company, riskLevel: .medium, actualImpact: actualImpact)
+
+        let bonus = scoreManager.calculateRiskRewardBonus()
+        XCTAssertEqual(bonus, GameConstants.mediumRiskSuccessBonus)
+    }
+
+    func testRiskRewardBonusFailedDecision() {
+        let option = DecisionOption(
+            title: "Failed",
+            description: "Failed high risk",
+            cost: 20000,
+            impact: DecisionImpact(performanceChange: 10),
+            riskLevel: .high
+        )
+        let actualImpact = DecisionImpact(performanceChange: -5, reputationChange: -3)
+        scoreManager.recordDecision(option, for: company, riskLevel: .high, actualImpact: actualImpact)
+
+        let bonus = scoreManager.calculateRiskRewardBonus()
+        XCTAssertEqual(bonus, 0)
+    }
+
+    func testDepartmentBalanceBonusAllAboveThreshold() {
+        for dept in company.departments {
+            dept.performance = GameConstants.departmentBalanceThreshold + 10
+        }
+        let bonus = scoreManager.calculateDepartmentBalanceBonus(company)
+        XCTAssertEqual(bonus, GameConstants.departmentBalanceBonus)
+    }
+
+    func testDepartmentBalanceBonusOneBelowThreshold() {
+        for dept in company.departments {
+            dept.performance = GameConstants.departmentBalanceThreshold + 10
+        }
+        company.departments.first!.performance = GameConstants.departmentBalanceThreshold - 1
+        let bonus = scoreManager.calculateDepartmentBalanceBonus(company)
+        XCTAssertEqual(bonus, 0)
+    }
+
+    func testScoreBreakdownComponents() {
+        let breakdown = scoreManager.getScoreBreakdown(for: company)
+        XCTAssertGreaterThanOrEqual(breakdown.baseScore, 0)
+        XCTAssertGreaterThanOrEqual(breakdown.longevityBonus, 0)
+        XCTAssertEqual(breakdown.totalScore, breakdown.baseScore + breakdown.longevityBonus + breakdown.consistencyBonus + breakdown.efficiencyBonus + breakdown.riskRewardBonus + breakdown.departmentBalanceBonus)
+    }
+
+    func testHighRiskStats() {
+        let option = DecisionOption(
+            title: "Risky",
+            description: "High risk",
+            cost: 20000,
+            impact: DecisionImpact(performanceChange: 10),
+            riskLevel: .high
+        )
+        scoreManager.recordDecision(option, for: company, riskLevel: .high, actualImpact: DecisionImpact(performanceChange: 8))
+        scoreManager.recordDecision(option, for: company, riskLevel: .high, actualImpact: DecisionImpact(performanceChange: -5, reputationChange: -3))
+
+        let stats = scoreManager.getHighRiskStats()
+        XCTAssertEqual(stats.taken, 2)
+        XCTAssertEqual(stats.successes, 1)
+    }
 }

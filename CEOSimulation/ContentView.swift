@@ -54,21 +54,60 @@ struct ContentView: View {
 
 struct Sidebar: View {
     let gameController: GameController
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             CompanyMetricsView(company: gameController.company)
-            
+
             if gameController.isGameActive {
+                if let event = gameController.currentMarketEvent {
+                    MarketEventSidebarView(event: event, quartersRemaining: gameController.marketEventQuartersRemaining)
+                }
+
                 DepartmentListView(departments: gameController.company.departments)
             }
-            
+
             Spacer()
-            
+
             GameControlsView(gameController: gameController)
         }
         .padding()
         .frame(minWidth: 280)
+    }
+}
+
+struct MarketEventSidebarView: View {
+    let event: MarketEvent
+    let quartersRemaining: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: event.icon)
+                    .foregroundColor(.indigo)
+                Text("Market Conditions")
+                    .font(.headline)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(event.name)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+
+                Text(event.description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(3)
+
+                Text("\(quartersRemaining) quarter\(quartersRemaining == 1 ? "" : "s") remaining")
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundColor(.indigo)
+            }
+        }
+        .padding()
+        .background(Color.indigo.opacity(0.1))
+        .cornerRadius(8)
     }
 }
 
@@ -144,7 +183,7 @@ struct DepartmentListView: View {
 
 struct DepartmentRowView: View {
     let department: Department
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -154,8 +193,13 @@ struct DepartmentRowView: View {
                     .font(.subheadline)
                     .fontWeight(.medium)
                 Spacer()
+                if department.isNeglected {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
             }
-            
+
             HStack {
                 Text("Performance: \(Int(department.performance))%")
                     .font(.caption)
@@ -165,9 +209,16 @@ struct DepartmentRowView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
+
+            if department.isNeglected {
+                Text("Neglected - needs attention!")
+                    .font(.caption2)
+                    .foregroundColor(.orange)
+                    .fontWeight(.medium)
+            }
         }
         .padding(8)
-        .background(Color(.systemGray6))
+        .background(department.isNeglected ? Color.orange.opacity(0.08) : Color(.systemGray6))
         .cornerRadius(6)
     }
 }

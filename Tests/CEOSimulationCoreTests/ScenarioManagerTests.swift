@@ -38,14 +38,12 @@ final class ScenarioManagerTests: XCTestCase {
     }
     
     func testDifferentScenariosGenerated() {
-        let scenario1 = scenarioManager.generateScenario(for: company)
-        let scenario2 = scenarioManager.generateScenario(for: company)
-        
-        // While scenarios could be the same, with proper randomization they usually differ
-        // This test may occasionally fail due to randomness, but helps verify variety
-        let titlesAreDifferent = scenario1.title != scenario2.title
-        let categoriesAreDifferent = scenario1.category != scenario2.category
-        
-        XCTAssertTrue(titlesAreDifferent || categoriesAreDifferent, "Scenarios should show variety")
+        // Generate several scenarios and check that we see at least 2 distinct titles
+        var titles = Set<String>()
+        for _ in 0..<10 {
+            let scenario = scenarioManager.generateScenario(for: company)
+            titles.insert(scenario.title)
+        }
+        XCTAssertGreaterThan(titles.count, 1, "10 scenarios should produce at least 2 distinct titles")
     }
 }

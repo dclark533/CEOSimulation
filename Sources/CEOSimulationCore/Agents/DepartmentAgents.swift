@@ -342,7 +342,7 @@ public class FinanceAgent: AIAgent {
                 reasoning: "Finance prefers measured approach with clear financial metrics and risk assessment.",
                 mood: .cautious
             )
-        case .technical, .marketing, .hr:
+        default:
             return AgentResponse(
                 message: "What's the expected ROI and payback period? We need to ensure this investment aligns with our financial objectives and cash flow projections.",
                 recommendedOption: 1,

@@ -8,13 +8,13 @@ struct GameView: View {
     @State private var selectedTab: GameTab = .scenario
     @State private var showingAgentAdvice = false
     @State private var agentResponses: [DepartmentType: AgentResponse] = [:]
-    
+
     enum GameTab: String, CaseIterable {
         case scenario = "Scenario"
         case advisors = "Advisors"
         case metrics = "Metrics"
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             TabView(selection: $selectedTab) {
@@ -28,7 +28,7 @@ struct GameView: View {
                     Text("Scenario")
                 }
                 .tag(GameTab.scenario)
-                
+
                 AdvisorsView(
                     agentManager: agentManager,
                     gameController: gameController,
@@ -39,7 +39,7 @@ struct GameView: View {
                     Text("Advisors")
                 }
                 .tag(GameTab.advisors)
-                
+
                 MetricsView(gameController: gameController)
                 .tabItem {
                     Image(systemName: "chart.bar")
@@ -53,9 +53,9 @@ struct GameView: View {
                         Button("Pause Game") {
                             gameController.pauseGame()
                         }
-                        
+
                         Divider()
-                        
+
                         Button("Exit Game", role: .destructive) {
                             gameController.requestExitGame()
                         }
@@ -76,7 +76,7 @@ struct GameView: View {
             }
         }
     }
-    
+
     private func loadAgentResponses(for scenario: Scenario) {
         agentResponses = agentManager.getAllAgentResponses(
             for: scenario,
@@ -90,16 +90,21 @@ struct ScenarioView: View {
     @Binding var agentResponses: [DepartmentType: AgentResponse]
     @Binding var showingAgentAdvice: Bool
     @State private var selectedOptionIndex: Int?
-    
+
     var body: some View {
         if let scenario = gameController.currentScenario {
             VStack(alignment: .leading, spacing: 20) {
+                // Market Event Banner
+                if let event = gameController.currentMarketEvent {
+                    MarketEventBanner(event: event)
+                }
+
                 ScenarioHeaderView(scenario: scenario)
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         ScenarioDescriptionView(scenario: scenario)
-                        
+
                         DecisionOptionsView(
                             scenario: scenario,
                             selectedOptionIndex: $selectedOptionIndex,
@@ -108,7 +113,7 @@ struct ScenarioView: View {
                                 selectedOptionIndex = nil
                             }
                         )
-                        
+
                         if !agentResponses.isEmpty {
                             AgentAdvicePreviewView(
                                 agentResponses: agentResponses,
@@ -133,9 +138,42 @@ struct ScenarioView: View {
     }
 }
 
+// MARK: - Market Event Banner
+
+struct MarketEventBanner: View {
+    let event: MarketEvent
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: event.icon)
+                .font(.title3)
+                .foregroundColor(.white)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(event.name)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                Text(event.description)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(2)
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(Color.indigo.gradient)
+        .cornerRadius(10)
+        .padding(.horizontal)
+    }
+}
+
+// MARK: - Scenario Header
+
 struct ScenarioHeaderView: View {
     let scenario: Scenario
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -149,7 +187,7 @@ struct ScenarioHeaderView: View {
                     .background(Color(.systemGray5))
                     .cornerRadius(4)
             }
-            
+
             Text(scenario.title)
                 .font(.title)
                 .fontWeight(.bold)
@@ -161,18 +199,22 @@ struct ScenarioHeaderView: View {
 
 struct CategoryBadge: View {
     let category: ScenarioCategory
-    
+
     var body: some View {
-        Text(category.rawValue)
-            .font(.caption)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(categoryColor.opacity(0.2))
-            .foregroundColor(categoryColor)
-            .cornerRadius(6)
+        HStack(spacing: 4) {
+            Image(systemName: categoryIcon)
+                .font(.caption2)
+            Text(category.rawValue)
+                .font(.caption)
+                .fontWeight(.semibold)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(categoryColor.opacity(0.2))
+        .foregroundColor(categoryColor)
+        .cornerRadius(6)
     }
-    
+
     private var categoryColor: Color {
         switch category {
         case .budget: return .red
@@ -180,18 +222,36 @@ struct CategoryBadge: View {
         case .marketing: return .purple
         case .hr: return .green
         case .opportunity: return .orange
+        case .ethical: return .teal
+        case .competitive: return .red
+        case .innovation: return .cyan
+        case .regulatory: return .brown
+        }
+    }
+
+    private var categoryIcon: String {
+        switch category {
+        case .budget: return "dollarsign.circle"
+        case .technical: return "gear"
+        case .marketing: return "megaphone"
+        case .hr: return "person.2"
+        case .opportunity: return "lightbulb"
+        case .ethical: return "scale.3d"
+        case .competitive: return "flag.2.crossed"
+        case .innovation: return "sparkles"
+        case .regulatory: return "building.columns"
         }
     }
 }
 
 struct ScenarioDescriptionView: View {
     let scenario: Scenario
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Situation")
                 .font(.headline)
-            
+
             Text(scenario.description)
                 .font(.body)
                 .lineSpacing(4)
@@ -202,16 +262,18 @@ struct ScenarioDescriptionView: View {
     }
 }
 
+// MARK: - Decision Options
+
 struct DecisionOptionsView: View {
     let scenario: Scenario
     @Binding var selectedOptionIndex: Int?
     let onDecisionMade: (Int) -> Void
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Your Options")
                 .font(.headline)
-            
+
             ForEach(Array(scenario.options.enumerated()), id: \.offset) { index, option in
                 DecisionOptionCard(
                     option: option,
@@ -222,16 +284,16 @@ struct DecisionOptionsView: View {
                     }
                 )
             }
-            
+
             if let selectedIndex = selectedOptionIndex {
                 HStack {
                     Button("Cancel") {
                         selectedOptionIndex = nil
                     }
                     .buttonStyle(.bordered)
-                    
+
                     Spacer()
-                    
+
                     Button("Make Decision") {
                         onDecisionMade(selectedIndex)
                     }
@@ -248,30 +310,30 @@ struct DecisionOptionCard: View {
     let index: Int
     let isSelected: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(option.title)
                     .font(.headline)
                     .foregroundColor(isSelected ? .white : .primary)
-                
+
                 Spacer()
-                
+
+                RiskLevelBadge(riskLevel: option.riskLevel, isSelected: isSelected)
+
                 Text("$\(Int(option.cost).formatted())")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(isSelected ? .white : costColor)
             }
-            
+
             Text(option.description)
                 .font(.body)
                 .foregroundColor(isSelected ? .white.opacity(0.9) : .secondary)
-            
-            ImpactPreviewView(
-                impact: option.impact,
-                isSelected: isSelected
-            )
+
+            // Impact hints instead of exact numbers
+            ImpactHintRow(impact: option.impact, isSelected: isSelected)
         }
         .padding()
         .background(isSelected ? Color.accentColor : Color(.systemGray6))
@@ -280,7 +342,7 @@ struct DecisionOptionCard: View {
             onTap()
         }
     }
-    
+
     private var costColor: Color {
         if option.cost == 0 {
             return .green
@@ -292,84 +354,103 @@ struct DecisionOptionCard: View {
     }
 }
 
-struct ImpactPreviewView: View {
-    let impact: DecisionImpact
+// MARK: - Risk Level Badge
+
+struct RiskLevelBadge: View {
+    let riskLevel: RiskLevel
     let isSelected: Bool
-    
+
     var body: some View {
-        HStack {
-            if impact.performanceChange != 0 {
-                ImpactChip(
-                    label: "Performance",
-                    value: impact.performanceChange,
-                    isSelected: isSelected
-                )
-            }
-            
-            if impact.moraleChange != 0 {
-                ImpactChip(
-                    label: "Morale",
-                    value: impact.moraleChange,
-                    isSelected: isSelected
-                )
-            }
-            
-            if impact.reputationChange != 0 {
-                ImpactChip(
-                    label: "Reputation",
-                    value: impact.reputationChange,
-                    isSelected: isSelected
-                )
-            }
-            
-            Spacer()
+        HStack(spacing: 4) {
+            Image(systemName: riskLevel.icon)
+                .font(.caption2)
+            Text(riskLevel.rawValue)
+                .font(.caption2)
+                .fontWeight(.semibold)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(isSelected ? Color.white.opacity(0.2) : riskColor.opacity(0.15))
+        .foregroundColor(isSelected ? .white : riskColor)
+        .cornerRadius(4)
+    }
+
+    private var riskColor: Color {
+        switch riskLevel {
+        case .low: return .green
+        case .medium: return .orange
+        case .high: return .red
         }
     }
 }
 
-struct ImpactChip: View {
-    let label: String
-    let value: Double
+// MARK: - Impact Hints (vague directional hints instead of exact numbers)
+
+struct ImpactHintRow: View {
+    let impact: DecisionImpact
     let isSelected: Bool
-    
+
     var body: some View {
-        HStack(spacing: 4) {
-            Text(label)
-            Text(value > 0 ? "+\(Int(value))" : "\(Int(value))")
-                .fontWeight(.semibold)
+        let hints = ImpactHint.fromImpact(impact)
+        if !hints.isEmpty {
+            HStack(spacing: 6) {
+                ForEach(hints, id: \.metric) { hint in
+                    ImpactHintChip(hint: hint, isSelected: isSelected)
+                }
+                Spacer()
+            }
         }
-        .font(.caption)
-        .padding(.horizontal, 6)
-        .padding(.vertical, 2)
-        .background(isSelected ? Color.white.opacity(0.2) : impactColor.opacity(0.2))
-        .foregroundColor(isSelected ? .white : impactColor)
-        .cornerRadius(4)
-    }
-    
-    private var impactColor: Color {
-        value > 0 ? .green : value < 0 ? .red : .gray
     }
 }
+
+struct ImpactHintChip: View {
+    let hint: ImpactHint
+    let isSelected: Bool
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: hint.direction == .positive ? "arrow.up" : hint.direction == .negative ? "arrow.down" : "minus")
+                .font(.caption2)
+            Text(hint.metric)
+                .font(.caption2)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(isSelected ? Color.white.opacity(0.2) : hintColor.opacity(0.15))
+        .foregroundColor(isSelected ? .white : hintColor)
+        .cornerRadius(4)
+    }
+
+    private var hintColor: Color {
+        switch hint.direction {
+        case .positive: return .green
+        case .negative: return .red
+        case .neutral: return .gray
+        }
+    }
+}
+
+// MARK: - Agent Advice
 
 struct AgentAdvicePreviewView: View {
     let agentResponses: [DepartmentType: AgentResponse]
     @Binding var showingAgentAdvice: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Department Advice")
                     .font(.headline)
-                
+
                 Spacer()
-                
+
                 Button("View All Advice") {
                     showingAgentAdvice = true
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
             }
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(Array(agentResponses.keys), id: \.self) { department in
@@ -390,7 +471,7 @@ struct AgentAdvicePreviewView: View {
 struct AgentAdviceCard: View {
     let department: DepartmentType
     let response: AgentResponse
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -402,12 +483,12 @@ struct AgentAdviceCard: View {
                 Text(response.mood.rawValue)
                     .font(.caption)
             }
-            
+
             Text(response.message)
                 .font(.caption)
                 .lineLimit(3)
                 .multilineTextAlignment(.leading)
-            
+
             if let recommendation = response.recommendedOption {
                 Text("Recommends option \(recommendation + 1)")
                     .font(.caption2)

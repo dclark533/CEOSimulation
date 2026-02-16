@@ -9,6 +9,9 @@ public struct GameSummary: Sendable {
     public let finalPerformance: Double
     public let strongestDepartment: DepartmentType
     public let gameEndReason: String
+    public let highRiskDecisionsTaken: Int
+    public let highRiskSuccesses: Int
+    public let neglectedDepartments: [DepartmentType]
 
     public init(
         quartersSurvived: Int,
@@ -18,7 +21,10 @@ public struct GameSummary: Sendable {
         finalReputation: Double,
         finalPerformance: Double,
         strongestDepartment: DepartmentType,
-        gameEndReason: String
+        gameEndReason: String,
+        highRiskDecisionsTaken: Int = 0,
+        highRiskSuccesses: Int = 0,
+        neglectedDepartments: [DepartmentType] = []
     ) {
         self.quartersSurvived = quartersSurvived
         self.scenariosCompleted = scenariosCompleted
@@ -28,6 +34,9 @@ public struct GameSummary: Sendable {
         self.finalPerformance = finalPerformance
         self.strongestDepartment = strongestDepartment
         self.gameEndReason = gameEndReason
+        self.highRiskDecisionsTaken = highRiskDecisionsTaken
+        self.highRiskSuccesses = highRiskSuccesses
+        self.neglectedDepartments = neglectedDepartments
     }
 
     public var isSuccessfulRun: Bool {
@@ -36,13 +45,13 @@ public struct GameSummary: Sendable {
 
     public var performanceGrade: String {
         let score = currentScore
-        if score >= 800 { return "A+" }
-        else if score >= 700 { return "A" }
-        else if score >= 600 { return "B+" }
-        else if score >= 500 { return "B" }
-        else if score >= 400 { return "C+" }
-        else if score >= 300 { return "C" }
-        else if score >= 200 { return "D" }
+        if score >= 900 { return "A+" }
+        else if score >= 800 { return "A" }
+        else if score >= 700 { return "B+" }
+        else if score >= 600 { return "B" }
+        else if score >= 500 { return "C+" }
+        else if score >= 400 { return "C" }
+        else if score >= 250 { return "D" }
         else { return "F" }
     }
 

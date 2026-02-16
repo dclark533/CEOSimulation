@@ -71,20 +71,123 @@ struct QuarterlyReportView: View {
 
 struct OverviewReportPage: View {
     let gameController: GameController
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 ReportHeaderView(gameController: gameController)
-                
+
+                if let event = gameController.currentMarketEvent {
+                    MarketConditionsReportView(
+                        event: event,
+                        quartersRemaining: gameController.marketEventQuartersRemaining
+                    )
+                }
+
                 KeyMetricsGrid(company: gameController.company)
-                
+
                 QuarterHighlightsView(gameController: gameController)
-                
+
                 NextQuarterGoalsView(gameController: gameController)
             }
             .padding()
         }
+    }
+}
+
+struct MarketConditionsReportView: View {
+    let event: MarketEvent
+    let quartersRemaining: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "globe")
+                    .foregroundColor(.indigo)
+                Text("Market Conditions")
+                    .font(.headline)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: event.icon)
+                        .font(.title3)
+                        .foregroundColor(.indigo)
+                    Text(event.name)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                }
+
+                Text(event.description)
+                    .font(.body)
+                    .lineSpacing(4)
+
+                HStack(spacing: 16) {
+                    if event.modifier.budgetDrain != 0 {
+                        MarketImpactChip(
+                            label: "Budget",
+                            value: event.modifier.budgetDrain,
+                            isMonetary: true
+                        )
+                    }
+                    if event.modifier.performanceChange != 0 {
+                        MarketImpactChip(
+                            label: "Performance",
+                            value: event.modifier.performanceChange
+                        )
+                    }
+                    if event.modifier.moraleChange != 0 {
+                        MarketImpactChip(
+                            label: "Morale",
+                            value: event.modifier.moraleChange
+                        )
+                    }
+                    if event.modifier.reputationChange != 0 {
+                        MarketImpactChip(
+                            label: "Reputation",
+                            value: event.modifier.reputationChange
+                        )
+                    }
+                }
+
+                Text("\(quartersRemaining) quarter\(quartersRemaining == 1 ? "" : "s") remaining")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.indigo)
+            }
+            .padding()
+            .background(Color.indigo.opacity(0.08))
+            .cornerRadius(12)
+        }
+    }
+}
+
+struct MarketImpactChip: View {
+    let label: String
+    let value: Double
+    var isMonetary: Bool = false
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: value > 0 ? "arrow.up" : "arrow.down")
+                .font(.caption2)
+            Text(label)
+                .font(.caption2)
+            if isMonetary {
+                Text("$\(Int(abs(value)).formatted())/Q")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+            } else {
+                Text("\(value > 0 ? "+" : "")\(Int(value))%/Q")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(value > 0 ? Color.green.opacity(0.15) : Color.red.opacity(0.15))
+        .foregroundColor(value > 0 ? .green : .red)
+        .cornerRadius(4)
     }
 }
 
@@ -298,6 +401,10 @@ struct QuarterHighlightsView: View {
         case .marketing: return "megaphone"
         case .hr: return "person.2"
         case .opportunity: return "lightbulb"
+        case .ethical: return "scale.3d"
+        case .competitive: return "flag.2.crossed"
+        case .innovation: return "sparkles"
+        case .regulatory: return "building.columns"
         }
     }
 }
@@ -511,19 +618,32 @@ struct DepartmentReportCard: View {
                 }
                 
                 Spacer()
-                
+
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("Performance")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
+
                     Text("\(Int(department.performance))%")
                         .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(department.performance > 60 ? .green : department.performance > 40 ? .orange : .red)
                 }
             }
-            
+
+            if department.isNeglected {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    Text("This department has been neglected for \(department.quartersSinceLastInvestment) quarters and is experiencing declining performance and morale.")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+                .padding(10)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(8)
+            }
+
             // Agent's quarterly report
             if let agent = agentManager.agents.first(where: { $0.department == department.type }) {
                 VStack(alignment: .leading, spacing: 8) {
