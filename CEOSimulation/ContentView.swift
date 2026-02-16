@@ -54,12 +54,19 @@ struct ContentView: View {
 
 struct Sidebar: View {
     let gameController: GameController
+    #if os(iOS)
+    private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
+    #else
+    private var isPhone: Bool { false }
+    #endif
 
     var body: some View {
         if gameController.isGameActive {
             activeGameSidebar
+        } else if isPhone {
+            compactWelcomeSidebar
         } else {
-            welcomeSidebar
+            regularWelcomeSidebar
         }
     }
 
@@ -81,7 +88,8 @@ struct Sidebar: View {
         .frame(minWidth: 280)
     }
 
-    private var welcomeSidebar: some View {
+    // iPhone: full welcome experience since detail pane isn't visible
+    private var compactWelcomeSidebar: some View {
         ScrollView {
             VStack(spacing: 24) {
                 Spacer(minLength: 20)
@@ -143,6 +151,49 @@ struct Sidebar: View {
         .onDisappear {
             GameKitManager.shared.hideAccessPoint()
         }
+    }
+
+    // iPad/Mac: minimal sidebar since WelcomeView is shown in the detail pane
+    private var regularWelcomeSidebar: some View {
+        VStack(spacing: 20) {
+            Spacer()
+
+            Image(systemName: "building.2.crop.circle")
+                .font(.system(size: 48))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.blue, .indigo],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            Text("CEO Simulation")
+                .font(.title2.bold())
+
+            Spacer()
+
+            Button("Start New Game") {
+                GameKitManager.shared.hideAccessPoint()
+                gameController.startNewGame()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+
+            if GameKitManager.shared.isAuthenticated {
+                Button {
+                    GameKitManager.shared.presentDashboard()
+                } label: {
+                    Label("Game Center", systemImage: "gamecontroller")
+                }
+                .buttonStyle(.bordered)
+            }
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, minHeight: 300)
+        .padding()
+        .frame(minWidth: 280)
     }
 }
 
