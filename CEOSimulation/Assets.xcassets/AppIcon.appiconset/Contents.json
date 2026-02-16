@@ -1,31 +1,37 @@
 {
   "images" : [
     {
+      "filename" : "CEOAppIcon 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
     },
     {
+      "filename" : "CEOAppIcon 2.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
+      "filename" : "CEOAppIcon 3.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
+      "filename" : "CEOAppIcon 4.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
+      "filename" : "CEOAppIcon 5.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
+      "filename" : "CEOAppIcon.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
