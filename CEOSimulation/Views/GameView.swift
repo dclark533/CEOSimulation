@@ -48,7 +48,7 @@ struct GameView: View {
                 .tag(GameTab.metrics)
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Menu {
                         Button("Pause Game") {
                             gameController.pauseGame()
@@ -184,7 +184,7 @@ struct ScenarioHeaderView: View {
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color(.systemGray5))
+                    .background(Color.platformSecondaryBackground)
                     .cornerRadius(4)
             }
 
@@ -256,7 +256,7 @@ struct ScenarioDescriptionView: View {
                 .font(.body)
                 .lineSpacing(4)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color.platformCardBackground)
                 .cornerRadius(8)
         }
     }
@@ -336,7 +336,7 @@ struct DecisionOptionCard: View {
             ImpactHintRow(impact: option.impact, isSelected: isSelected)
         }
         .padding()
-        .background(isSelected ? Color.accentColor : Color(.systemGray6))
+        .background(isSelected ? Color.accentColor : Color.platformCardBackground)
         .cornerRadius(12)
         .onTapGesture {
             onTap()
@@ -498,7 +498,7 @@ struct AgentAdviceCard: View {
         }
         .padding(8)
         .frame(width: 200)
-        .background(Color(.systemGray6))
+        .background(Color.platformCardBackground)
         .cornerRadius(8)
     }
 }

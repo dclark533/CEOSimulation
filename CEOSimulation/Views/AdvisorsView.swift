@@ -96,7 +96,7 @@ struct AdvisorCard: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.platformCardBackground)
         .cornerRadius(12)
     }
 }
@@ -203,7 +203,7 @@ struct AdvisorDetailView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(8)
-                    .background(Color(.systemGray5))
+                    .background(Color.platformSecondaryBackground)
                     .cornerRadius(6)
             }
             

@@ -6,6 +6,9 @@ struct CEOSimulationApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    GameKitManager.shared.authenticate()
+                }
         }
         #if os(macOS)
         .windowResizability(.contentSize)

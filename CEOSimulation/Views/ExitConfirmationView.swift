@@ -47,9 +47,11 @@ struct ExitConfirmationView: View {
             }
             .padding()
             .navigationTitle("Exit Game")
+            #if !os(macOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         gameController.cancelExitGame()
                         dismiss()
@@ -91,7 +93,7 @@ struct GameSummaryCard: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.platformCardBackground)
         .cornerRadius(12)
     }
 }

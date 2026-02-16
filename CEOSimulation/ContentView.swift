@@ -144,7 +144,7 @@ struct CompanyMetricsView: View {
             )
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.platformCardBackground)
         .cornerRadius(8)
     }
 }
@@ -218,7 +218,7 @@ struct DepartmentRowView: View {
             }
         }
         .padding(8)
-        .background(department.isNeglected ? Color.orange.opacity(0.08) : Color(.systemGray6))
+        .background(department.isNeglected ? Color.orange.opacity(0.08) : Color.platformCardBackground)
         .cornerRadius(6)
     }
 }
@@ -283,17 +283,33 @@ struct WelcomeView: View {
                 FeatureRow(icon: "trophy", title: "Performance Tracking", description: "Track your leadership effectiveness over time")
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.platformCardBackground)
             .cornerRadius(12)
-            
+
             Button("Start Your CEO Journey") {
+                GameKitManager.shared.hideAccessPoint()
                 gameController.startNewGame()
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+
+            if GameKitManager.shared.isAuthenticated {
+                Button {
+                    GameKitManager.shared.presentDashboard()
+                } label: {
+                    Label("Game Center", systemImage: "gamecontroller")
+                }
+                .buttonStyle(.bordered)
+            }
         }
         .padding()
         .frame(maxWidth: 600)
+        .onAppear {
+            GameKitManager.shared.showAccessPoint()
+        }
+        .onDisappear {
+            GameKitManager.shared.hideAccessPoint()
+        }
     }
 }
 

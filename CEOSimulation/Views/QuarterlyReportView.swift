@@ -23,7 +23,9 @@ struct QuarterlyReportView: View {
                     PerformanceAnalysisPage(gameController: gameController)
                         .tag(2)
                 }
+                #if os(iOS)
                 .tabViewStyle(.page(indexDisplayMode: .always))
+                #endif
                 
                 HStack {
                     Button("Previous") {
@@ -57,9 +59,11 @@ struct QuarterlyReportView: View {
                 .padding()
             }
             .navigationTitle("Q\(gameController.company.quarter) Report")
+            #if !os(macOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Close") {
                         dismiss()
                     }
@@ -227,7 +231,7 @@ struct ReportHeaderView: View {
                 .font(.body)
                 .lineSpacing(4)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color.platformCardBackground)
                 .cornerRadius(12)
         }
     }
@@ -360,7 +364,7 @@ struct QuarterMetricCard: View {
         }
         .padding()
         .frame(height: 120)
-        .background(Color(.systemGray6))
+        .background(Color.platformCardBackground)
         .cornerRadius(12)
     }
 }
@@ -454,7 +458,7 @@ struct NextQuarterGoalsView: View {
                 }
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.platformCardBackground)
             .cornerRadius(12)
         }
     }
@@ -655,7 +659,7 @@ struct DepartmentReportCard: View {
                         .font(.body)
                         .lineSpacing(4)
                         .padding()
-                        .background(Color(.systemGray5))
+                        .background(Color.platformSecondaryBackground)
                         .cornerRadius(8)
                 }
             }
@@ -683,7 +687,7 @@ struct DepartmentReportCard: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.platformCardBackground)
         .cornerRadius(12)
     }
 }
@@ -800,7 +804,7 @@ struct LeadershipStyleView: View {
                     .lineSpacing(4)
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.platformCardBackground)
             .cornerRadius(12)
         }
     }
@@ -879,7 +883,7 @@ struct DecisionHistoryView: View {
                 )
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.platformCardBackground)
             .cornerRadius(12)
         }
     }
@@ -905,42 +909,62 @@ struct DecisionSummaryRow: View {
 struct GameOverView: View {
     let gameController: GameController
     @Environment(\.dismiss) private var dismiss
-    
+    @State private var scoreSubmitted = false
+
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: gameController.company.quarter >= 12 ? "trophy.fill" : "exclamationmark.triangle.fill")
                 .font(.system(size: 80))
                 .foregroundColor(gameController.company.quarter >= 12 ? .yellow : .red)
-            
+
             Text(gameController.company.quarter >= 12 ? "Congratulations!" : "Game Over")
                 .font(.title)
                 .fontWeight(.bold)
-            
+
             if let reason = gameController.gameOverReason {
                 Text(reason)
                     .font(.headline)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
-            
+
             VStack(spacing: 12) {
                 Text("Final Score: \(gameController.getCurrentScore())")
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.blue)
-                
+
                 Text("Quarters Survived: \(gameController.company.quarter)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+
+                if scoreSubmitted {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("Score submitted to Game Center")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
-            
+
             HStack(spacing: 16) {
                 Button("Start New Game") {
                     dismiss()
                     gameController.startNewGame()
                 }
                 .buttonStyle(.borderedProminent)
-                
+
+                if GameKitManager.shared.isAuthenticated {
+                    Button {
+                        GameKitManager.shared.presentDashboard()
+                    } label: {
+                        Label("Leaderboard", systemImage: "trophy")
+                    }
+                    .buttonStyle(.bordered)
+                }
+
                 Button("Close") {
                     dismiss()
                 }
@@ -949,6 +973,14 @@ struct GameOverView: View {
         }
         .padding()
         .interactiveDismissDisabled()
+        .task {
+            guard GameKitManager.shared.isAuthenticated else { return }
+            let summary = gameController.getGameSummary()
+            let breakdown = gameController.getScoreBreakdown()
+            await GameKitManager.shared.submitScore(breakdown.totalScore)
+            await GameKitManager.shared.reportAchievements(for: summary, scoreBreakdown: breakdown)
+            scoreSubmitted = true
+        }
     }
 }
 

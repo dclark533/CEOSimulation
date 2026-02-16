@@ -148,7 +148,7 @@ struct MetricCard: View {
                 .foregroundColor(.secondary)
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.platformCardBackground)
         .cornerRadius(12)
     }
 }
@@ -167,7 +167,7 @@ struct DepartmentPerformanceChart: View {
                 }
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.platformCardBackground)
             .cornerRadius(12)
         }
     }
@@ -204,7 +204,7 @@ struct DepartmentBarChart: View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color(.systemGray4))
+                        .fill(Color.platformTertiaryFill)
                         .frame(height: 8)
                         .cornerRadius(4)
 
@@ -282,7 +282,7 @@ struct ScoreBreakdownView: View {
                 }
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.platformCardBackground)
             .cornerRadius(12)
         }
     }
@@ -329,7 +329,7 @@ struct RecentDecisionsView: View {
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding()
-                    .background(Color(.systemGray6))
+                    .background(Color.platformCardBackground)
                     .cornerRadius(12)
             } else {
                 VStack(spacing: 8) {
@@ -338,7 +338,7 @@ struct RecentDecisionsView: View {
                     }
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color.platformCardBackground)
                 .cornerRadius(12)
             }
         }
