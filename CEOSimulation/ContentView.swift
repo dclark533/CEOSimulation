@@ -56,16 +56,22 @@ struct Sidebar: View {
     let gameController: GameController
 
     var body: some View {
+        if gameController.isGameActive {
+            activeGameSidebar
+        } else {
+            welcomeSidebar
+        }
+    }
+
+    private var activeGameSidebar: some View {
         VStack(alignment: .leading, spacing: 16) {
             CompanyMetricsView(company: gameController.company)
 
-            if gameController.isGameActive {
-                if let event = gameController.currentMarketEvent {
-                    MarketEventSidebarView(event: event, quartersRemaining: gameController.marketEventQuartersRemaining)
-                }
-
-                DepartmentListView(departments: gameController.company.departments)
+            if let event = gameController.currentMarketEvent {
+                MarketEventSidebarView(event: event, quartersRemaining: gameController.marketEventQuartersRemaining)
             }
+
+            DepartmentListView(departments: gameController.company.departments)
 
             Spacer()
 
@@ -73,6 +79,70 @@ struct Sidebar: View {
         }
         .padding()
         .frame(minWidth: 280)
+    }
+
+    private var welcomeSidebar: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                Spacer(minLength: 20)
+
+                Image(systemName: "building.2.crop.circle")
+                    .font(.system(size: 72))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.blue, .indigo],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                VStack(spacing: 6) {
+                    Text("CEO Simulation")
+                        .font(.largeTitle.bold())
+
+                    Text("Lead your company to success")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
+                    FeatureRow(icon: "person.3", title: "Manage 5 Departments", description: "Sales, Marketing, Engineering, HR, and Finance")
+                    FeatureRow(icon: "chart.line.uptrend.xyaxis", title: "Dynamic Scenarios", description: "Face realistic business challenges")
+                    FeatureRow(icon: "brain", title: "AI Department Heads", description: "Get advice from intelligent agents")
+                    FeatureRow(icon: "trophy", title: "Performance Tracking", description: "Track your leadership effectiveness")
+                }
+                .padding()
+                .background(Color.platformCardBackground)
+                .cornerRadius(12)
+
+                Button("Start Your CEO Journey") {
+                    GameKitManager.shared.hideAccessPoint()
+                    gameController.startNewGame()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+
+                if GameKitManager.shared.isAuthenticated {
+                    Button {
+                        GameKitManager.shared.presentDashboard()
+                    } label: {
+                        Label("Game Center", systemImage: "gamecontroller")
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                Spacer(minLength: 20)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal)
+        }
+        .frame(minWidth: 280)
+        .onAppear {
+            GameKitManager.shared.showAccessPoint()
+        }
+        .onDisappear {
+            GameKitManager.shared.hideAccessPoint()
+        }
     }
 }
 
