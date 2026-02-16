@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "CEOSimulation",
+    name: "CEOSimulationCore",
     platforms: [
         .iOS(.v17),
         .macOS(.v14)
