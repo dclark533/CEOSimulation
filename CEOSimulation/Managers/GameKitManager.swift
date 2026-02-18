@@ -41,11 +41,11 @@ final class GameKitManager {
                 if let viewController {
                     #if os(iOS)
                     if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                       let rootVC = windowScene.windows.first?.rootViewController {
+                       let rootVC = windowScene.keyWindow?.rootViewController {
                         rootVC.present(viewController, animated: true)
                     }
                     #elseif os(macOS)
-                    if let window = NSApplication.shared.keyWindow {
+                    if let window = NSApplication.shared.mainWindow {
                         window.contentViewController?.presentAsSheet(viewController)
                     }
                     #endif
@@ -158,12 +158,12 @@ final class GameKitManager {
 
         #if os(iOS)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
+           let rootVC = windowScene.keyWindow?.rootViewController {
             vc.gameCenterDelegate = GameCenterDismissHandler.shared
             rootVC.present(vc, animated: true)
         }
         #elseif os(macOS)
-        if let window = NSApplication.shared.keyWindow {
+        if let window = NSApplication.shared.mainWindow {
             vc.gameCenterDelegate = GameCenterDismissHandler.shared
             window.contentViewController?.presentAsSheet(vc)
         }

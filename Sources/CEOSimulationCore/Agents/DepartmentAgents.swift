@@ -14,8 +14,10 @@ public class SalesAgent: AIAgent {
     }
     
     public func generateResponse(to scenario: Scenario, companyState: Company) -> AgentResponse {
-        let salesDept = companyState.departments.first { $0.type == .sales }!
-        
+        guard let salesDept = companyState.departments.first(where: { $0.type == .sales }) else {
+            return AgentResponse(message: "Sales data unavailable.", recommendedOption: 1, reasoning: "Department not found.", mood: .neutral)
+        }
+
         switch scenario.category {
         case .budget:
             return AgentResponse(
@@ -49,7 +51,7 @@ public class SalesAgent: AIAgent {
     }
     
     public func provideQuarterlyReport(for company: Company) -> String {
-        let salesDept = company.departments.first { $0.type == .sales }!
+        guard let salesDept = company.departments.first(where: { $0.type == .sales }) else { return "Sales data unavailable." }
         let performance = Int(salesDept.performance)
         
         if performance >= 80 {
@@ -90,7 +92,9 @@ public class MarketingAgent: AIAgent {
     }
     
     public func generateResponse(to scenario: Scenario, companyState: Company) -> AgentResponse {
-        let marketingDept = companyState.departments.first { $0.type == .marketing }!
+        guard let marketingDept = companyState.departments.first(where: { $0.type == .marketing }) else {
+            return AgentResponse(message: "Marketing data unavailable.", recommendedOption: 1, reasoning: "Department not found.", mood: .neutral)
+        }
         
         switch scenario.category {
         case .marketing:
@@ -125,7 +129,7 @@ public class MarketingAgent: AIAgent {
     }
     
     public func provideQuarterlyReport(for company: Company) -> String {
-        let marketingDept = company.departments.first { $0.type == .marketing }!
+        guard let marketingDept = company.departments.first(where: { $0.type == .marketing }) else { return "Marketing data unavailable." }
         let performance = Int(marketingDept.performance)
         
         if performance >= 80 {
@@ -166,7 +170,9 @@ public class EngineeringAgent: AIAgent {
     }
     
     public func generateResponse(to scenario: Scenario, companyState: Company) -> AgentResponse {
-        let engineeringDept = companyState.departments.first { $0.type == .engineering }!
+        guard let engineeringDept = companyState.departments.first(where: { $0.type == .engineering }) else {
+            return AgentResponse(message: "Engineering data unavailable.", recommendedOption: 1, reasoning: "Department not found.", mood: .neutral)
+        }
         
         switch scenario.category {
         case .technical:
@@ -210,7 +216,7 @@ public class EngineeringAgent: AIAgent {
     }
     
     public func provideQuarterlyReport(for company: Company) -> String {
-        let engineeringDept = company.departments.first { $0.type == .engineering }!
+        guard let engineeringDept = company.departments.first(where: { $0.type == .engineering }) else { return "Engineering data unavailable." }
         let performance = Int(engineeringDept.performance)
         
         if performance >= 80 {
@@ -251,7 +257,9 @@ public class HRAgent: AIAgent {
     }
     
     public func generateResponse(to scenario: Scenario, companyState: Company) -> AgentResponse {
-        let hrDept = companyState.departments.first { $0.type == .hr }!
+        guard let hrDept = companyState.departments.first(where: { $0.type == .hr }) else {
+            return AgentResponse(message: "HR data unavailable.", recommendedOption: 1, reasoning: "Department not found.", mood: .neutral)
+        }
         
         switch scenario.category {
         case .hr:
@@ -286,7 +294,7 @@ public class HRAgent: AIAgent {
     }
     
     public func provideQuarterlyReport(for company: Company) -> String {
-        let hrDept = company.departments.first { $0.type == .hr }!
+        guard let hrDept = company.departments.first(where: { $0.type == .hr }) else { return "HR data unavailable." }
         let morale = Int(hrDept.morale)
         
         if morale >= 80 {

@@ -68,12 +68,7 @@ struct MetricsHeaderView: View {
 struct CurrentStatusGrid: View {
     let company: Company
     
-    let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
+    let columns = [GridItem(.adaptive(minimum: 140))]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

@@ -15,7 +15,6 @@
 		2A000001000000C5 /* AdvisorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C4 /* AdvisorsView.swift */; };
 		2A000001000000C7 /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C6 /* MetricsView.swift */; };
 		2A000001000000C9 /* QuarterlyReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000C8 /* QuarterlyReportView.swift */; };
-		2A000001000000CD /* ExitConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000CE /* ExitConfirmationView.swift */; };
 		2A000001000000D0 /* CEOSimulationCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2A000001000000CF /* CEOSimulationCore */; };
 		2A000001000000E1 /* Color+Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000E0 /* Color+Platform.swift */; };
 		2A000001000000E3 /* GameKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000E2 /* GameKitManager.swift */; };
@@ -33,7 +32,6 @@
 		2A000001000000C6 /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
 		2A000001000000C8 /* QuarterlyReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuarterlyReportView.swift; sourceTree = "<group>"; };
 		2A000001000000CC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2A000001000000CE /* ExitConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExitConfirmationView.swift; sourceTree = "<group>"; };
 		2A000001000000E0 /* Color+Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Platform.swift"; sourceTree = "<group>"; };
 		2A000001000000E2 /* GameKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameKitManager.swift; sourceTree = "<group>"; };
 		2A000001000000E4 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
@@ -93,7 +91,6 @@
 				2A000001000000C4 /* AdvisorsView.swift */,
 				2A000001000000C6 /* MetricsView.swift */,
 				2A000001000000C8 /* QuarterlyReportView.swift */,
-				2A000001000000CE /* ExitConfirmationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -211,7 +208,6 @@
 				2A000001000000C5 /* AdvisorsView.swift in Sources */,
 				2A000001000000C7 /* MetricsView.swift in Sources */,
 				2A000001000000C9 /* QuarterlyReportView.swift in Sources */,
-				2A000001000000CD /* ExitConfirmationView.swift in Sources */,
 				2A000001000000AA /* CEOSimulationApp.swift in Sources */,
 				2A000001000000E1 /* Color+Platform.swift in Sources */,
 				2A000001000000E3 /* GameKitManager.swift in Sources */,
