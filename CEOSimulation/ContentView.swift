@@ -6,19 +6,19 @@ struct ContentView: View {
     @State private var agentManager = AgentManager()
     @State private var showingQuarterlyReport = false
     @State private var showingGameOver = false
-    
+
+    #if os(iOS)
+    private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
+    #else
+    private var isPhone: Bool { false }
+    #endif
+
     var body: some View {
-        NavigationSplitView {
-            Sidebar(gameController: gameController)
-        } detail: {
-            if gameController.isGameActive {
-                GameView(
-                    gameController: gameController,
-                    agentManager: agentManager,
-                    showingQuarterlyReport: $showingQuarterlyReport
-                )
+        Group {
+            if isPhone {
+                phoneLayout
             } else {
-                WelcomeView(gameController: gameController)
+                tabletDesktopLayout
             }
         }
         .sheet(isPresented: $showingQuarterlyReport) {
@@ -30,7 +30,7 @@ struct ContentView: View {
         .sheet(isPresented: $showingGameOver) {
             GameOverView(gameController: gameController)
         }
-        .onChange(of: gameController.gameOverReason) { oldValue, newValue in
+        .onChange(of: gameController.gameOverReason) { _, newValue in
             if newValue != nil {
                 showingGameOver = true
             }
@@ -48,6 +48,38 @@ struct ContentView: View {
             }
         } message: {
             Text("Are you sure you want to exit the current game? Your progress will be lost.")
+        }
+    }
+
+    // iPhone: use NavigationStack so GameView is directly reachable
+    private var phoneLayout: some View {
+        NavigationStack {
+            if gameController.isGameActive {
+                GameView(
+                    gameController: gameController,
+                    agentManager: agentManager,
+                    showingQuarterlyReport: $showingQuarterlyReport
+                )
+            } else {
+                Sidebar(gameController: gameController)
+            }
+        }
+    }
+
+    // iPad/Mac: split view with sidebar alongside detail
+    private var tabletDesktopLayout: some View {
+        NavigationSplitView {
+            Sidebar(gameController: gameController)
+        } detail: {
+            if gameController.isGameActive {
+                GameView(
+                    gameController: gameController,
+                    agentManager: agentManager,
+                    showingQuarterlyReport: $showingQuarterlyReport
+                )
+            } else {
+                WelcomeView(gameController: gameController)
+            }
         }
     }
 }
