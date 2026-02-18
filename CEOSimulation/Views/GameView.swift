@@ -71,7 +71,7 @@ struct GameView: View {
             }
         }
         .onChange(of: gameController.company.quarter) { oldValue, newValue in
-            if newValue > oldValue && newValue % 4 == 1 {
+            if newValue > oldValue {
                 showingQuarterlyReport = true
             }
         }
@@ -338,6 +338,9 @@ struct DecisionOptionCard: View {
         .padding()
         .background(isSelected ? Color.accentColor : Color.platformCardBackground)
         .cornerRadius(12)
+        .accessibilityLabel("\(option.title). Cost: \(Int(option.cost).formatted()) dollars. Risk: \(option.riskLevel.rawValue).")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(isSelected ? "Selected. Double-tap to deselect." : "Double-tap to select this option.")
         .onTapGesture {
             onTap()
         }

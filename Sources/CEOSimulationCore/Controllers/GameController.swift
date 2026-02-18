@@ -170,6 +170,10 @@ public class GameController {
         return scoreManager.getScoreBreakdown(for: company)
     }
 
+    public func getPerformanceAnalysis() -> PerformanceAnalysis {
+        return scoreManager.getPerformanceAnalysis(for: company)
+    }
+
     public func getPerformanceMetrics() -> [String: Double] {
         return [
             "Budget": company.budget,

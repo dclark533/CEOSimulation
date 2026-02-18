@@ -8,7 +8,7 @@ struct QuarterlyReportView: View {
     @State private var currentPage = 0
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 TabView(selection: $currentPage) {
                     OverviewReportPage(gameController: gameController)
@@ -765,19 +765,7 @@ struct PerformanceAnalysisPage: View {
     }
     
     private func getPerformanceAnalysis() -> PerformanceAnalysis? {
-        // This would typically come from the ScoreManager
-        // For now, creating a basic analysis
-        return PerformanceAnalysis(
-            totalScore: gameController.getCurrentScore(),
-            quartersSurvived: gameController.company.quarter,
-            decisionsMade: gameController.scenarioHistory.count,
-            averageDecisionCost: 12000,
-            strongestDepartment: .sales,
-            weakestDepartment: .finance,
-            keyStrengths: ["Strategic Thinking", "Financial Management"],
-            areasForImprovement: ["Team Morale", "Innovation"],
-            leadershipStyle: .balanced
-        )
+        return gameController.getPerformanceAnalysis()
     }
 }
 
@@ -909,6 +897,7 @@ struct DecisionSummaryRow: View {
 struct GameOverView: View {
     let gameController: GameController
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var hSizeClass
     @State private var scoreSubmitted = false
 
     var body: some View {
@@ -949,27 +938,7 @@ struct GameOverView: View {
                 }
             }
 
-            HStack(spacing: 16) {
-                Button("Start New Game") {
-                    dismiss()
-                    gameController.startNewGame()
-                }
-                .buttonStyle(.borderedProminent)
-
-                if GameKitManager.shared.isAuthenticated {
-                    Button {
-                        GameKitManager.shared.presentDashboard()
-                    } label: {
-                        Label("Leaderboard", systemImage: "trophy")
-                    }
-                    .buttonStyle(.bordered)
-                }
-
-                Button("Close") {
-                    dismiss()
-                }
-                .buttonStyle(.bordered)
-            }
+            gameOverButtons
         }
         .padding()
         .interactiveDismissDisabled()
@@ -980,6 +949,37 @@ struct GameOverView: View {
             await GameKitManager.shared.submitScore(breakdown.totalScore)
             await GameKitManager.shared.reportAchievements(for: summary, scoreBreakdown: breakdown)
             scoreSubmitted = true
+        }
+    }
+
+    @ViewBuilder
+    private var gameOverButtons: some View {
+        let buttons = Group {
+            Button("Start New Game") {
+                dismiss()
+                gameController.startNewGame()
+            }
+            .buttonStyle(.borderedProminent)
+
+            if GameKitManager.shared.isAuthenticated {
+                Button {
+                    GameKitManager.shared.presentDashboard()
+                } label: {
+                    Label("Leaderboard", systemImage: "trophy")
+                }
+                .buttonStyle(.bordered)
+            }
+
+            Button("Close") {
+                dismiss()
+            }
+            .buttonStyle(.bordered)
+        }
+
+        if hSizeClass == .compact {
+            VStack(spacing: 12) { buttons }
+        } else {
+            HStack(spacing: 16) { buttons }
         }
     }
 }
