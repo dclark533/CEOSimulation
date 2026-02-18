@@ -465,7 +465,7 @@ struct AgentAdvicePreviewView: View {
                         }
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 4)
             }
         }
     }
