@@ -36,12 +36,22 @@ struct ContentView: View {
                 showingGameOver = true
             }
         }
+        #if os(iOS)
         .fullScreenCover(isPresented: .init(
             get: { !hasSeenOnboarding },
             set: { if !$0 { hasSeenOnboarding = true } }
         )) {
             OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
         }
+        #else
+        .sheet(isPresented: .init(
+            get: { !hasSeenOnboarding },
+            set: { if !$0 { hasSeenOnboarding = true } }
+        )) {
+            OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
+                .frame(minWidth: 540, minHeight: 620)
+        }
+        #endif
         .confirmationDialog(
             "Exit Game",
             isPresented: $gameController.showingExitConfirmation,

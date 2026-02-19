@@ -27,4 +27,13 @@ extension Color {
         Color(.systemGray4)
         #endif
     }
+
+    /// Window/sheet background — replaces UIColor.systemBackground / NSColor.windowBackgroundColor
+    static var platformWindowBackground: Color {
+        #if os(macOS)
+        Color(NSColor.windowBackgroundColor)
+        #else
+        Color(UIColor.systemBackground)
+        #endif
+    }
 }

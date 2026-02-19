@@ -39,7 +39,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Color(UIColor.systemBackground).ignoresSafeArea()
+            Color.platformWindowBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // Skip button row
@@ -55,6 +55,7 @@ struct OnboardingView: View {
                 }
 
                 // Page content
+                #if os(iOS)
                 TabView(selection: $currentPage) {
                     ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
                         OnboardingPageView(page: page)
@@ -63,6 +64,11 @@ struct OnboardingView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut, value: currentPage)
+                #else
+                OnboardingPageView(page: pages[currentPage])
+                    .animation(.easeInOut, value: currentPage)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                #endif
 
                 // Page indicator dots
                 HStack(spacing: 8) {
