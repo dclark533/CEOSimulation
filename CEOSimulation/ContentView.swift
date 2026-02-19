@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var agentManager = AgentManager()
     @State private var showingQuarterlyReport = false
     @State private var showingGameOver = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
     #if os(iOS)
     private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
@@ -34,6 +35,12 @@ struct ContentView: View {
             if newValue != nil {
                 showingGameOver = true
             }
+        }
+        .fullScreenCover(isPresented: .init(
+            get: { !hasSeenOnboarding },
+            set: { if !$0 { hasSeenOnboarding = true } }
+        )) {
+            OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
         }
         .confirmationDialog(
             "Exit Game",

@@ -6,6 +6,7 @@ public class GameController {
     public var company: Company
     public var currentScenario: Scenario?
     public var scenarioHistory: [Scenario]
+    public var quarterSnapshots: [QuarterSnapshot]
     public var isGameActive: Bool
     public var gameOverReason: String?
     public var showingExitConfirmation: Bool = false
@@ -18,6 +19,7 @@ public class GameController {
     public init() {
         self.company = Company()
         self.scenarioHistory = []
+        self.quarterSnapshots = []
         self.isGameActive = false
         self.scenarioManager = ScenarioManager()
         self.scoreManager = ScoreManager()
@@ -26,6 +28,7 @@ public class GameController {
     public func startNewGame() {
         company = Company()
         scenarioHistory.removeAll()
+        quarterSnapshots.removeAll()
         currentScenario = nil
         isGameActive = true
         gameOverReason = nil
@@ -100,11 +103,23 @@ public class GameController {
         if scenarioHistory.count > 0 && scenarioHistory.count % GameConstants.scenariosPerQuarter == 0 {
             applyNeglectDecay()
             applyMarketEventEffects()
+            recordQuarterSnapshot()
             company.advanceQuarter()
             selectMarketEvent()
         }
 
         currentScenario = scenarioManager.generateScenario(for: company, marketEvent: currentMarketEvent)
+    }
+
+    private func recordQuarterSnapshot() {
+        let perfMap = Dictionary(
+            uniqueKeysWithValues: company.departments.map { ($0.type, $0.performance) }
+        )
+        quarterSnapshots.append(QuarterSnapshot(
+            quarter: company.quarter,
+            budget: company.budget,
+            departmentPerformance: perfMap
+        ))
     }
 
     private func selectMarketEvent() {

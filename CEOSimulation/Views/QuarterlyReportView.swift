@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 import CEOSimulationCore
 
@@ -13,15 +14,18 @@ struct QuarterlyReportView: View {
                 TabView(selection: $currentPage) {
                     OverviewReportPage(gameController: gameController)
                         .tag(0)
-                    
+
+                    TrendsPage(gameController: gameController)
+                        .tag(1)
+
                     DepartmentReportsPage(
                         gameController: gameController,
                         agentManager: agentManager
                     )
-                        .tag(1)
-                    
-                    PerformanceAnalysisPage(gameController: gameController)
                         .tag(2)
+
+                    PerformanceAnalysisPage(gameController: gameController)
+                        .tag(3)
                 }
                 #if os(iOS)
                 .tabViewStyle(.page(indexDisplayMode: .always))
@@ -37,16 +41,16 @@ struct QuarterlyReportView: View {
                     
                     Spacer()
                     
-                    Text("Page \(currentPage + 1) of 3")
+                    Text("Page \(currentPage + 1) of 4")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
+
                     Spacer()
-                    
-                    if currentPage < 2 {
+
+                    if currentPage < 3 {
                         Button("Next") {
                             withAnimation {
-                                currentPage = min(2, currentPage + 1)
+                                currentPage = min(3, currentPage + 1)
                             }
                         }
                     } else {
@@ -570,6 +574,204 @@ struct GoalRow: View {
         .padding(.vertical, 4)
     }
 }
+
+// MARK: - Trends Page
+
+private struct DeptDataPoint: Identifiable {
+    let id: String          // "quarter-departmentName"
+    let quarter: Int
+    let department: String
+    let performance: Double
+}
+
+struct TrendsPage: View {
+    let gameController: GameController
+
+    private var snapshots: [QuarterSnapshot] { gameController.quarterSnapshots }
+
+    private var deptPoints: [DeptDataPoint] {
+        snapshots.flatMap { snapshot in
+            DepartmentType.allCases.compactMap { dept in
+                guard let perf = snapshot.departmentPerformance[dept] else { return nil }
+                return DeptDataPoint(
+                    id: "\(snapshot.quarter)-\(dept.rawValue)",
+                    quarter: snapshot.quarter,
+                    department: dept.rawValue,
+                    performance: perf
+                )
+            }
+        }
+    }
+
+    private var deptColors: KeyValuePairs<String, Color> {
+        ["Sales": .blue,
+         "Marketing": .purple,
+         "Engineering": .teal,
+         "Human Resources": .green,
+         "Finance": .orange]
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                Text("Trends")
+                    .font(.title2.bold())
+                    .padding(.horizontal)
+
+                if snapshots.isEmpty {
+                    Text("Trends will appear here after your first quarter completes.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                } else {
+                    budgetChart
+                    departmentChart
+                }
+            }
+            .padding(.top)
+            .padding(.bottom, 24)
+        }
+    }
+
+    // MARK: Budget
+
+    private var budgetChart: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Budget", systemImage: "banknote")
+                .font(.headline)
+
+            Chart(snapshots) { snapshot in
+                AreaMark(
+                    x: .value("Quarter", snapshot.quarter),
+                    yStart: .value("Budget", 0),
+                    yEnd: .value("Budget", snapshot.budget)
+                )
+                .foregroundStyle(Color.blue.opacity(0.15))
+
+                LineMark(
+                    x: .value("Quarter", snapshot.quarter),
+                    y: .value("Budget", snapshot.budget)
+                )
+                .foregroundStyle(Color.blue)
+                .interpolationMethod(.catmullRom)
+
+                PointMark(
+                    x: .value("Quarter", snapshot.quarter),
+                    y: .value("Budget", snapshot.budget)
+                )
+                .foregroundStyle(Color.blue)
+                .symbolSize(40)
+            }
+            .chartXAxis {
+                AxisMarks(values: snapshots.map(\.quarter)) { val in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let q = val.as(Int.self) { Text("Q\(q)").font(.caption2) }
+                    }
+                }
+            }
+            .chartYAxis {
+                AxisMarks { val in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let b = val.as(Double.self) {
+                            Text("$\(Int(b / 1_000))k").font(.caption2)
+                        }
+                    }
+                }
+            }
+            .frame(height: 180)
+        }
+        .padding()
+        .background(Color.platformCardBackground)
+        .cornerRadius(12)
+        .padding(.horizontal)
+    }
+
+    // MARK: Department Performance
+
+    private var departmentChart: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Department Performance", systemImage: "person.3")
+                .font(.headline)
+
+            Chart(deptPoints) { point in
+                LineMark(
+                    x: .value("Quarter", point.quarter),
+                    y: .value("Performance %", point.performance)
+                )
+                .foregroundStyle(by: .value("Dept", point.department))
+                .symbol(by: .value("Dept", point.department))
+                .interpolationMethod(.catmullRom)
+
+                PointMark(
+                    x: .value("Quarter", point.quarter),
+                    y: .value("Performance %", point.performance)
+                )
+                .foregroundStyle(by: .value("Dept", point.department))
+                .symbolSize(36)
+            }
+            .chartForegroundStyleScale([
+                "Sales": Color.blue,
+                "Marketing": Color.purple,
+                "Engineering": Color.teal,
+                "Human Resources": Color.green,
+                "Finance": Color.orange
+            ])
+            .chartXAxis {
+                AxisMarks(values: snapshots.map(\.quarter)) { val in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let q = val.as(Int.self) { Text("Q\(q)").font(.caption2) }
+                    }
+                }
+            }
+            .chartYAxis {
+                AxisMarks(values: [0, 25, 50, 75, 100]) { val in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let v = val.as(Int.self) { Text("\(v)%").font(.caption2) }
+                    }
+                }
+            }
+            .chartYScale(domain: 0...100)
+            .frame(height: 220)
+
+            // Legend
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                ForEach(DepartmentType.allCases, id: \.rawValue) { dept in
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(colorFor(dept))
+                            .frame(width: 8, height: 8)
+                        Text(dept.rawValue)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color.platformCardBackground)
+        .cornerRadius(12)
+        .padding(.horizontal)
+    }
+
+    private func colorFor(_ dept: DepartmentType) -> Color {
+        switch dept {
+        case .sales:       return .blue
+        case .marketing:   return .purple
+        case .engineering: return .teal
+        case .hr:          return .green
+        case .finance:     return .orange
+        }
+    }
+}
+
+// MARK: -
 
 struct DepartmentReportsPage: View {
     let gameController: GameController
