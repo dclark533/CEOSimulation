@@ -5,9 +5,12 @@ import CEOSimulationCore
 struct QuarterlyReportView: View {
     let gameController: GameController
     let agentManager: AgentManager
+    // Held as AnyObject? so the declaration compiles on all OS versions;
+    // at runtime holds a FoundationModelAdvisorService on iOS 18.1+ / macOS 15.1+.
+    let foundationModelService: AnyObject?
     @Environment(\.dismiss) private var dismiss
     @State private var currentPage = 0
-    
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -20,7 +23,8 @@ struct QuarterlyReportView: View {
 
                     DepartmentReportsPage(
                         gameController: gameController,
-                        agentManager: agentManager
+                        agentManager: agentManager,
+                        foundationModelService: foundationModelService
                     )
                         .tag(2)
 
@@ -776,7 +780,8 @@ struct TrendsPage: View {
 struct DepartmentReportsPage: View {
     let gameController: GameController
     let agentManager: AgentManager
-    
+    let foundationModelService: AnyObject?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -784,12 +789,13 @@ struct DepartmentReportsPage: View {
                     .font(.title2)
                     .fontWeight(.bold)
                     .padding(.horizontal)
-                
+
                 ForEach(gameController.company.departments, id: \.type.rawValue) { department in
                     DepartmentReportCard(
                         department: department,
                         agentManager: agentManager,
-                        company: gameController.company
+                        company: gameController.company,
+                        foundationModelService: foundationModelService
                     )
                     .padding(.horizontal)
                 }
@@ -803,7 +809,9 @@ struct DepartmentReportCard: View {
     let department: Department
     let agentManager: AgentManager
     let company: Company
-    
+    let foundationModelService: AnyObject?
+    @State private var reportText: String?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -811,18 +819,18 @@ struct DepartmentReportCard: View {
                     Image(systemName: department.type.icon)
                         .font(.title2)
                         .foregroundColor(.blue)
-                    
+
                     VStack(alignment: .leading, spacing: 2) {
                         Text(department.type.rawValue)
                             .font(.headline)
                             .fontWeight(.semibold)
-                        
+
                         Text("Department Report")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
-                
+
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: 2) {
@@ -850,20 +858,36 @@ struct DepartmentReportCard: View {
                 .cornerRadius(8)
             }
 
-            // Agent's quarterly report
-            if let agent = agentManager.agents.first(where: { $0.department == department.type }) {
-                VStack(alignment: .leading, spacing: 8) {
+            // Department Head Summary — loaded async on Apple Intelligence devices
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
                     Text("Department Head Summary")
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                    
-                    Text(agent.provideQuarterlyReport(for: company))
+
+                    Spacer()
+
+                    if reportText == nil {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                }
+
+                if let text = reportText {
+                    Text(text)
                         .font(.body)
                         .lineSpacing(4)
                         .padding()
                         .background(Color.platformSecondaryBackground)
                         .cornerRadius(8)
+                } else {
+                    Color.platformSecondaryBackground
+                        .frame(height: 80)
+                        .cornerRadius(8)
                 }
+            }
+            .task {
+                reportText = await loadReportText()
             }
             
             // Performance metrics
@@ -891,6 +915,18 @@ struct DepartmentReportCard: View {
         .padding()
         .background(Color.platformCardBackground)
         .cornerRadius(12)
+    }
+
+    private func loadReportText() async -> String {
+        guard let agent = agentManager.agents.first(where: { $0.department == department.type }) else {
+            return "Report unavailable."
+        }
+        if #available(iOS 26.0, macOS 26.0, *),
+           let service = foundationModelService as? FoundationModelAdvisorService,
+           service.isAvailable {
+            return await service.generateQuarterlyReport(agent: agent, company: company)
+        }
+        return agent.provideQuarterlyReport(for: company)
     }
 }
 
@@ -1189,6 +1225,7 @@ struct GameOverView: View {
 #Preview {
     QuarterlyReportView(
         gameController: GameController(),
-        agentManager: AgentManager()
+        agentManager: AgentManager(),
+        foundationModelService: nil
     )
 }

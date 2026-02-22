@@ -7,6 +7,9 @@ struct ContentView: View {
     @State private var showingQuarterlyReport = false
     @State private var showingGameOver = false
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    // Typed as AnyObject? so the @State declaration compiles on all OS versions;
+    // at runtime this holds a FoundationModelAdvisorService on iOS 18.1+ / macOS 15.1+.
+    @State private var foundationModelService: AnyObject?
 
     #if os(iOS)
     private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
@@ -25,15 +28,27 @@ struct ContentView: View {
         .sheet(isPresented: $showingQuarterlyReport) {
             QuarterlyReportView(
                 gameController: gameController,
-                agentManager: agentManager
+                agentManager: agentManager,
+                foundationModelService: foundationModelService
             )
         }
         .sheet(isPresented: $showingGameOver) {
             GameOverView(gameController: gameController)
         }
-        .onChange(of: gameController.gameOverReason) { _, newValue in
+        .onAppear {
+            if #available(iOS 26.0, macOS 26.0, *) {
+                foundationModelService = FoundationModelAdvisorService()
+            }
+        }
+        .onChange(of: gameController.gameOverReason) { oldValue, newValue in
             if newValue != nil {
                 showingGameOver = true
+            } else if oldValue != nil {
+                // New game started — reset advisor sessions so context doesn't bleed
+                if #available(iOS 26.0, macOS 26.0, *),
+                   let service = foundationModelService as? FoundationModelAdvisorService {
+                    service.resetSessions()
+                }
             }
         }
         #if os(iOS)
@@ -75,7 +90,8 @@ struct ContentView: View {
                 GameView(
                     gameController: gameController,
                     agentManager: agentManager,
-                    showingQuarterlyReport: $showingQuarterlyReport
+                    showingQuarterlyReport: $showingQuarterlyReport,
+                    foundationModelService: foundationModelService
                 )
             } else {
                 Sidebar(gameController: gameController)
@@ -92,7 +108,8 @@ struct ContentView: View {
                 GameView(
                     gameController: gameController,
                     agentManager: agentManager,
-                    showingQuarterlyReport: $showingQuarterlyReport
+                    showingQuarterlyReport: $showingQuarterlyReport,
+                    foundationModelService: foundationModelService
                 )
             } else {
                 WelcomeView(gameController: gameController)

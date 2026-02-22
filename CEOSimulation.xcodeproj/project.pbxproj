@@ -18,6 +18,7 @@
 		2A000001000000D0 /* CEOSimulationCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2A000001000000CF /* CEOSimulationCore */; };
 		2A000001000000E1 /* Color+Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000E0 /* Color+Platform.swift */; };
 		2A000001000000E3 /* GameKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000E2 /* GameKitManager.swift */; };
+		2A000001000000F0 /* FoundationModelAdvisorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000EF /* FoundationModelAdvisorService.swift */; };
 		2A000001000000E5 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A000001000000E4 /* GameKit.framework */; };
 		2A000001000000EA /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000001000000E9 /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
@@ -35,6 +36,7 @@
 		2A000001000000CC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A000001000000E0 /* Color+Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Platform.swift"; sourceTree = "<group>"; };
 		2A000001000000E2 /* GameKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameKitManager.swift; sourceTree = "<group>"; };
+		2A000001000000EF /* FoundationModelAdvisorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelAdvisorService.swift; sourceTree = "<group>"; };
 		2A000001000000E4 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		2A000001000000E6 /* CEOSimulation.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CEOSimulation.entitlements; sourceTree = "<group>"; };
 		2A000001000000E9 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				2A000001000000E2 /* GameKitManager.swift */,
+				2A000001000000EF /* FoundationModelAdvisorService.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 				2A000001000000AA /* CEOSimulationApp.swift in Sources */,
 				2A000001000000E1 /* Color+Platform.swift in Sources */,
 				2A000001000000E3 /* GameKitManager.swift in Sources */,
+				2A000001000000F0 /* FoundationModelAdvisorService.swift in Sources */,
 				2A000001000000EA /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

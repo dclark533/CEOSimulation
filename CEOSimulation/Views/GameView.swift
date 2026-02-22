@@ -5,9 +5,20 @@ struct GameView: View {
     let gameController: GameController
     let agentManager: AgentManager
     @Binding var showingQuarterlyReport: Bool
+    // Held as AnyObject? so this compiles on all OS versions;
+    // at runtime holds a FoundationModelAdvisorService on iOS 18.1+ / macOS 15.1+.
+    let foundationModelService: AnyObject?
     @State private var selectedTab: GameTab = .scenario
     @State private var showingAgentAdvice = false
     @State private var agentResponses: [DepartmentType: AgentResponse] = [:]
+    @State private var isLoadingAdvisorResponses = false
+
+    private var usingAppleIntelligence: Bool {
+        if #available(iOS 26.0, macOS 26.0, *) {
+            return (foundationModelService as? FoundationModelAdvisorService)?.isAvailable == true
+        }
+        return false
+    }
 
     enum GameTab: String, CaseIterable {
         case scenario = "Scenario"
@@ -21,7 +32,8 @@ struct GameView: View {
                 ScenarioView(
                     gameController: gameController,
                     agentResponses: $agentResponses,
-                    showingAgentAdvice: $showingAgentAdvice
+                    showingAgentAdvice: $showingAgentAdvice,
+                    isLoadingAdvisorResponses: isLoadingAdvisorResponses
                 )
                 .tabItem {
                     Image(systemName: "doc.text")
@@ -32,7 +44,9 @@ struct GameView: View {
                 AdvisorsView(
                     agentManager: agentManager,
                     gameController: gameController,
-                    agentResponses: agentResponses
+                    agentResponses: agentResponses,
+                    isLoading: isLoadingAdvisorResponses,
+                    usingAppleIntelligence: usingAppleIntelligence
                 )
                 .tabItem {
                     Image(systemName: "person.3")
@@ -65,10 +79,9 @@ struct GameView: View {
                 }
             }
         }
-        .onChange(of: gameController.currentScenario) { oldValue, newValue in
-            if let scenario = newValue {
-                loadAgentResponses(for: scenario)
-            }
+        .task(id: gameController.currentScenario?.id) {
+            guard let scenario = gameController.currentScenario else { return }
+            await loadAgentResponses(for: scenario)
         }
         .onChange(of: gameController.company.quarter) { oldValue, newValue in
             if newValue > oldValue {
@@ -77,11 +90,33 @@ struct GameView: View {
         }
     }
 
-    private func loadAgentResponses(for scenario: Scenario) {
-        agentResponses = agentManager.getAllAgentResponses(
-            for: scenario,
-            company: gameController.company
-        )
+    private func loadAgentResponses(for scenario: Scenario) async {
+        isLoadingAdvisorResponses = true
+
+        if #available(iOS 26.0, macOS 26.0, *),
+           let service = foundationModelService as? FoundationModelAdvisorService,
+           service.isAvailable {
+            var responses: [DepartmentType: AgentResponse] = [:]
+            for agent in agentManager.agents {
+                if Task.isCancelled { break }
+                let response = await service.generateAdvisorResponse(
+                    agent: agent,
+                    scenario: scenario,
+                    company: gameController.company
+                )
+                responses[agent.department] = response
+            }
+            if !Task.isCancelled {
+                agentResponses = responses
+            }
+        } else {
+            agentResponses = agentManager.getAllAgentResponses(
+                for: scenario,
+                company: gameController.company
+            )
+        }
+
+        isLoadingAdvisorResponses = false
     }
 }
 
@@ -89,6 +124,7 @@ struct ScenarioView: View {
     let gameController: GameController
     @Binding var agentResponses: [DepartmentType: AgentResponse]
     @Binding var showingAgentAdvice: Bool
+    var isLoadingAdvisorResponses: Bool = false
     @State private var selectedOptionIndex: Int?
 
     var body: some View {
@@ -114,10 +150,11 @@ struct ScenarioView: View {
                             }
                         )
 
-                        if !agentResponses.isEmpty {
+                        if !agentResponses.isEmpty || isLoadingAdvisorResponses {
                             AgentAdvicePreviewView(
                                 agentResponses: agentResponses,
-                                showingAgentAdvice: $showingAgentAdvice
+                                showingAgentAdvice: $showingAgentAdvice,
+                                isLoading: isLoadingAdvisorResponses
                             )
                         }
                     }
@@ -438,6 +475,11 @@ struct ImpactHintChip: View {
 struct AgentAdvicePreviewView: View {
     let agentResponses: [DepartmentType: AgentResponse]
     @Binding var showingAgentAdvice: Bool
+    var isLoading: Bool = false
+
+    private var displayDepartments: [DepartmentType] {
+        isLoading ? DepartmentType.allCases : Array(agentResponses.keys)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -452,17 +494,17 @@ struct AgentAdvicePreviewView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                .disabled(isLoading)
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(Array(agentResponses.keys), id: \.self) { department in
-                        if let response = agentResponses[department] {
-                            AgentAdviceCard(
-                                department: department,
-                                response: response
-                            )
-                        }
+                    ForEach(displayDepartments, id: \.self) { department in
+                        AgentAdviceCard(
+                            department: department,
+                            response: agentResponses[department],
+                            isLoading: isLoading
+                        )
                     }
                 }
                 .padding(.horizontal, 4)
@@ -473,7 +515,8 @@ struct AgentAdvicePreviewView: View {
 
 struct AgentAdviceCard: View {
     let department: DepartmentType
-    let response: AgentResponse
+    let response: AgentResponse?
+    var isLoading: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -483,20 +526,28 @@ struct AgentAdviceCard: View {
                 Text(department.rawValue)
                     .font(.caption)
                     .fontWeight(.semibold)
-                Text(response.mood.rawValue)
-                    .font(.caption)
+                if let response {
+                    Text(response.mood.rawValue)
+                        .font(.caption)
+                }
             }
 
-            Text(response.message)
-                .font(.caption)
-                .lineLimit(3)
-                .multilineTextAlignment(.leading)
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 8)
+            } else if let response {
+                Text(response.message)
+                    .font(.caption)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
 
-            if let recommendation = response.recommendedOption {
-                Text("Recommends option \(recommendation + 1)")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.blue)
+                if let recommendation = response.recommendedOption {
+                    Text("Recommends option \(recommendation + 1)")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
+                }
             }
         }
         .padding(8)
@@ -510,6 +561,7 @@ struct AgentAdviceCard: View {
     GameView(
         gameController: GameController(),
         agentManager: AgentManager(),
-        showingQuarterlyReport: .constant(false)
+        showingQuarterlyReport: .constant(false),
+        foundationModelService: nil
     )
 }

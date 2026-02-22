@@ -5,32 +5,46 @@ struct AdvisorsView: View {
     let agentManager: AgentManager
     let gameController: GameController
     let agentResponses: [DepartmentType: AgentResponse]
-    
+    var isLoading: Bool = false
+    var usingAppleIntelligence: Bool = false
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 if let scenario = gameController.currentScenario {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Department Head Advice")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
-                        
+                        HStack {
+                            Text("Department Head Advice")
+                                .font(.title2)
+                                .fontWeight(.bold)
+
+                            Spacer()
+
+                            if usingAppleIntelligence {
+                                if #available(iOS 26.0, macOS 26.0, *) {
+                                    Label("Apple Intelligence", systemImage: "apple.intelligence")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+
                         Text("Your department heads have analyzed the situation and are ready to share their perspectives:")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .padding(.horizontal)
-                        
+
                         ForEach(DepartmentType.allCases, id: \.self) { department in
-                            if let response = agentResponses[department] {
-                                AdvisorCard(
-                                    department: department,
-                                    response: response,
-                                    scenario: scenario,
-                                    company: gameController.company
-                                )
-                                .padding(.horizontal)
-                            }
+                            AdvisorCard(
+                                department: department,
+                                response: agentResponses[department],
+                                scenario: scenario,
+                                company: gameController.company,
+                                isLoading: isLoading,
+                                usingAppleIntelligence: usingAppleIntelligence
+                            )
+                            .padding(.horizontal)
                         }
                     }
                 } else {
@@ -38,11 +52,11 @@ struct AdvisorsView: View {
                         Image(systemName: "person.3.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.gray)
-                        
+
                         Text("Advisors Standby")
                             .font(.title2)
                             .fontWeight(.semibold)
-                        
+
                         Text("Your department heads are ready to provide advice when the next scenario arrives.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -58,41 +72,87 @@ struct AdvisorsView: View {
 
 struct AdvisorCard: View {
     let department: DepartmentType
-    let response: AgentResponse
+    let response: AgentResponse?
     let scenario: Scenario
     let company: Company
+    var isLoading: Bool = false
+    var usingAppleIntelligence: Bool = false
     @State private var isExpanded = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            AdvisorHeader(
-                department: department,
-                response: response,
-                isExpanded: isExpanded
-            ) {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isExpanded.toggle()
+            // Always show the department header
+            HStack {
+                Image(systemName: department.icon)
+                    .font(.title2)
+                    .foregroundColor(.blue)
+                    .frame(width: 30)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(department.rawValue)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    Text("Department Head")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                if usingAppleIntelligence && !isLoading {
+                    if #available(iOS 26.0, macOS 26.0, *) {
+                        Image(systemName: "apple.intelligence")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                if let response, !isLoading {
+                    Text(response.mood.rawValue)
+                        .font(.title2)
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
-            
-            Text(response.message)
-                .font(.body)
-                .lineSpacing(4)
-            
-            if let recommendedOption = response.recommendedOption,
-               recommendedOption < scenario.options.count {
-                RecommendationView(
-                    option: scenario.options[recommendedOption],
-                    optionIndex: recommendedOption
-                )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if response != nil && !isLoading {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isExpanded.toggle()
+                    }
+                }
             }
-            
-            if isExpanded {
-                AdvisorDetailView(
-                    department: department,
-                    response: response,
-                    company: company
-                )
+
+            if isLoading {
+                HStack {
+                    ProgressView()
+                    Text("Thinking…")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.vertical, 12)
+            } else if let response {
+                Text(response.message)
+                    .font(.body)
+                    .lineSpacing(4)
+
+                if let recommendedOption = response.recommendedOption,
+                   recommendedOption < scenario.options.count {
+                    RecommendationView(
+                        option: scenario.options[recommendedOption],
+                        optionIndex: recommendedOption
+                    )
+                }
+
+                if isExpanded {
+                    AdvisorDetailView(
+                        department: department,
+                        response: response,
+                        company: company
+                    )
+                }
             }
         }
         .padding()
@@ -101,46 +161,6 @@ struct AdvisorCard: View {
     }
 }
 
-struct AdvisorHeader: View {
-    let department: DepartmentType
-    let response: AgentResponse
-    let isExpanded: Bool
-    let onTap: () -> Void
-    
-    var body: some View {
-        HStack {
-            HStack(spacing: 12) {
-                Image(systemName: department.icon)
-                    .font(.title2)
-                    .foregroundColor(.blue)
-                    .frame(width: 30)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(department.rawValue)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
-                    Text("Department Head")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Text(response.mood.rawValue)
-                    .font(.title2)
-                
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
-        }
-    }
-}
 
 struct RecommendationView: View {
     let option: DecisionOption
